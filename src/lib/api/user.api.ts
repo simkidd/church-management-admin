@@ -1,0 +1,97 @@
+import { ApiResponse } from "@/interfaces/response.interface";
+import api from "../axios";
+import {
+  CreateUserData,
+  IUser,
+  ListUsersParams,
+  UpdateUserData,
+} from "@/interfaces/user.interface";
+
+export const usersApi = {
+  // Get all users
+  getUsers: async (
+    params?: ListUsersParams
+  ): Promise<
+    ApiResponse<{ users: IUser[]; total: number; page: number; limit: number }>
+  > => {
+    const response = await api.get("/users", { params });
+    return response.data;
+  },
+
+  // Get user by ID
+  getUserById: async (
+    id: string
+  ): Promise<
+    ApiResponse<{
+      user: IUser;
+    }>
+  > => {
+    const response = await api.get(`/users/${id}`);
+    return response.data;
+  },
+
+  // Create user
+  createUser: async (
+    data: CreateUserData
+  ): Promise<
+    ApiResponse<{
+      user: IUser;
+    }>
+  > => {
+    const response = await api.post("/users/create", data);
+    return response.data;
+  },
+
+  // Update user
+  updateUser: async (
+    id: string,
+    data: UpdateUserData
+  ): Promise<
+    ApiResponse<{
+      user: IUser;
+    }>
+  > => {
+    const response = await api.put(`/users/${id}/update`, data);
+    return response.data;
+  },
+
+  // Delete user
+  deleteUser: async (id: string): Promise<ApiResponse<{ message: string }>> => {
+    const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
+
+  // Update user avatar
+  updateUserAvatar: async (
+    id: string,
+    avatarFile: File
+  ): Promise<
+    ApiResponse<{
+      user: IUser;
+    }>
+  > => {
+    const formData = new FormData();
+    formData.append("avatar", avatarFile);
+
+    const response = await api.patch(`/users/${id}/avatar`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
+
+  // Delete user avatar
+  deleteUserAvatar: async (
+    id: string
+  ): Promise<
+    ApiResponse<{
+      user: IUser;
+    }>
+  > => {
+    const response = await api.delete(`/users/${id}/avatar`);
+    return response.data;
+  },
+};
+
+export default usersApi;

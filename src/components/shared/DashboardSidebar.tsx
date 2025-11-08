@@ -1,0 +1,508 @@
+"use client";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useLogout } from "@/hooks/use-logout";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth.store";
+import {
+  Award,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Calendar,
+  CalendarDays,
+  Church,
+  Clock,
+  FileCheck,
+  FileText,
+  GraduationCap,
+  Home,
+  LogOut,
+  Mic,
+  Settings,
+  Shield,
+  TrendingUp,
+  User,
+  Users,
+  Video,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+interface ISidebarMenu {
+  title: string;
+  url: string;
+  roles: string[];
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
+  items?: ISidebarMenu[];
+}
+
+interface INavGroup {
+  title: string;
+  roles: string[];
+  items: ISidebarMenu[];
+}
+
+const navGroups: INavGroup[] = [
+  {
+    title: "Main",
+    roles: ["super-admin", "admin", "pastor", "instructor"],
+    items: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        roles: ["super-admin", "admin", "pastor", "instructor"],
+        icon: Home,
+      },
+      // {
+      //   title: "Analytics",
+      //   url: "/dashboard/analytics",
+      //   roles: ["super-admin", "admin"],
+      //   icon: BarChart3,
+      // },
+    ],
+  },
+  {
+    title: "User Management",
+    roles: ["super-admin", "admin"],
+    items: [
+      {
+        title: "All Users",
+        url: "/dashboard/users",
+        roles: ["super-admin", "admin"],
+        icon: Users,
+      },
+      {
+        title: "Role Management",
+        url: "/dashboard/users/roles",
+        roles: ["super-admin"],
+        icon: Shield,
+      },
+    ],
+  },
+  {
+    title: "Course Management",
+    roles: ["super-admin", "admin", "instructor"],
+    items: [
+      {
+        title: "All Courses",
+        url: "/dashboard/courses",
+        roles: ["super-admin", "admin", "instructor"],
+        icon: BookOpen,
+      },
+      {
+        title: "My Courses",
+        url: "/dashboard/courses/my-courses",
+        roles: ["super-admin", "admin", "instructor"],
+        icon: GraduationCap,
+      },
+      {
+        title: "Enrollments",
+        url: "/dashboard/courses/enrollments",
+        roles: ["super-admin", "admin", "instructor"],
+        icon: Award,
+      },
+    ],
+  },
+  {
+    title: "Exam System",
+    roles: ["super-admin", "admin", "instructor"],
+    items: [
+      {
+        title: "All Exams",
+        url: "/dashboard/exams",
+        roles: ["super-admin", "admin", "instructor"],
+        icon: FileCheck,
+      },
+      {
+        title: "Submissions",
+        url: "/dashboard/exams/submissions",
+        roles: ["super-admin", "admin", "instructor"],
+        icon: TrendingUp,
+      },
+      {
+        title: "Results",
+        url: "/dashboard/exams/results",
+        roles: ["super-admin", "admin", "instructor"],
+        icon: Award,
+      },
+    ],
+  },
+  {
+    title: "Sermon Management",
+    roles: ["super-admin", "admin", "pastor"],
+    items: [
+      {
+        title: "All Sermons",
+        url: "/dashboard/sermons",
+        roles: ["super-admin", "admin", "pastor"],
+        icon: Mic,
+      },
+      {
+        title: "Popular Sermons",
+        url: "/dashboard/sermons/popular",
+        roles: ["super-admin", "admin", "pastor"],
+        icon: TrendingUp,
+      },
+      // {
+      //   title: "Sermon Analytics",
+      //   url: "/dashboard/sermons/analytics",
+      //   roles: ["super-admin", "admin", "pastor"],
+      //   icon: BarChart3,
+      // },
+    ],
+  },
+  {
+    title: "Event Management",
+    roles: ["super-admin", "admin", "pastor"],
+    items: [
+      {
+        title: "All Events",
+        url: "/dashboard/events",
+        roles: ["super-admin", "admin", "pastor"],
+        icon: Calendar,
+      },
+      {
+        title: "My Events",
+        url: "/dashboard/events/created",
+        roles: ["super-admin", "admin", "pastor"],
+        icon: User,
+      },
+      {
+        title: "Event Registrations",
+        url: "/dashboard/events/registrations",
+        roles: ["super-admin", "admin", "pastor"],
+        icon: Users,
+      },
+    ],
+  },
+  // {
+  //   title: "Appointment System",
+  //   roles: ["super-admin", "admin", "pastor"],
+  //   items: [
+  //     {
+  //       title: "Appointments",
+  //       url: "/dashboard/appointments",
+  //       roles: ["super-admin", "admin", "pastor"],
+  //       icon: Clock,
+  //     },
+  //     {
+  //       title: "Availability",
+  //       url: "/dashboard/appointments/availability",
+  //       roles: ["super-admin", "admin", "pastor"],
+  //       icon: Calendar,
+  //     },
+  //     {
+  //       title: "Booking Requests",
+  //       url: "/dashboard/appointments/requests",
+  //       roles: ["super-admin", "admin", "pastor"],
+  //       icon: User,
+  //     },
+  //   ],
+  // },
+];
+
+// Common navigation items for all roles (outside the groups)
+const commonNav: ISidebarMenu[] = [
+  {
+    title: "Profile",
+    url: "/dashboard/profile",
+    roles: ["super-admin", "admin", "instructor", "pastor"],
+    icon: User,
+  },
+  {
+    title: "Notifications",
+    url: "/dashboard/notifications",
+    roles: ["super-admin", "admin", "instructor", "pastor"],
+    icon: Bell,
+  },
+  {
+    title: "Settings",
+    url: "/dashboard/settings",
+    roles: ["super-admin", "admin"],
+    icon: Settings,
+  },
+];
+
+export function DashboardSidebar() {
+  const pathname = usePathname();
+  const { user, hasHydrated } = useAuthStore();
+  const { mutate: logout, isPending } = useLogout();
+  const { setOpenMobile } = useSidebar();
+
+  const getInitials = (firstName?: string, lastName?: string) => {
+    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
+  };
+
+  const isItemActive = (itemUrl: string) => {
+    if (itemUrl === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+
+    return pathname.startsWith(`${itemUrl}/`) || pathname === itemUrl;
+  };
+
+  const getUserRole = (): string => {
+    if (!user) return "";
+
+    if (user.isSuperAdmin) return "super-admin";
+    if (user.isAdmin) return "admin";
+    if (user.isPastor) return "pastor";
+    if (user.isInstructor) return "instructor";
+
+    return "member";
+  };
+
+  const userRole = getUserRole();
+
+  const hasAccess = (roles: string[]): boolean => {
+    return roles.includes(userRole);
+  };
+
+  const filterNestedItems = (items: ISidebarMenu[]): ISidebarMenu[] => {
+    return items
+      .filter((item) => hasAccess(item.roles))
+      .map((item) => ({
+        ...item,
+        items: item.items ? filterNestedItems(item.items) : undefined,
+      }));
+  };
+
+  // Get user role display name
+  const getRoleDisplayName = (): string => {
+    switch (userRole) {
+      case "super-admin":
+        return "Super Admin";
+      case "admin":
+        return "Administrator";
+      case "pastor":
+        return "Pastor";
+      case "instructor":
+        return "Instructor";
+      default:
+        return "Member";
+    }
+  };
+
+  if (!hasHydrated) {
+    return (
+      <Sidebar collapsible="icon" className="border-r">
+        <SidebarHeader className="px-2 py-2 border-b min-h-16 flex items-center justify-center">
+          <div className="flex items-center py-1">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <Church className="h-6 w-6 text-blue-600 mx-auto" />
+              <span className="text-lg font-semibold">ChurchCMS</span>
+            </Link>
+          </div>
+        </SidebarHeader>
+
+        <SidebarContent>
+          <div className="p-4 space-y-4">
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-4 w-1/3" />
+          </div>
+        </SidebarContent>
+
+        <SidebarFooter className="p-2 border-t shrink-0">
+          <div className="flex items-center gap-3 p-2">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <div className="flex flex-1 flex-col space-y-1">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+            <Skeleton className="h-8 w-8 rounded-md" />
+          </div>
+        </SidebarFooter>
+      </Sidebar>
+    );
+  }
+
+  return (
+    <Sidebar collapsible="icon" className="border-r">
+      <SidebarHeader className="px-2 py-2 border-b min-h-16 flex items-center justify-center">
+        <div className="flex items-center py-1">
+          <Link
+            href="/"
+            className="flex items-center gap-2"
+            onClick={() => setOpenMobile(false)}
+          >
+            <div
+              className={cn(
+                "aspect-square transition-all duration-200",
+                "group-data-[collapsible=icon]:block",
+                "group-data-[collapsible=icon]:w-8",
+                "group-data-[state=expanded]:hidden",
+                "hidden md:block"
+              )}
+            >
+              <Church className="h-6 w-6 text-blue-600 mx-auto" />
+            </div>
+            <div
+              className={cn(
+                "transition-all duration-200",
+                "group-data-[collapsible=icon]:hidden",
+                "group-data-[state=expanded]:block"
+              )}
+            >
+              <span className="text-lg font-semibold">ChurchCMS</span>
+            </div>
+          </Link>
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <ScrollArea className="flex-1 flex flex-col min-h-0">
+          {/* Role-specific navigation */}
+          {navGroups
+            .filter((group) => hasAccess(group.roles))
+            .map((group, groupIndex) => {
+              const filteredItems = filterNestedItems(group.items);
+              if (filteredItems.length === 0) return null;
+
+              return (
+                <SidebarGroup key={groupIndex}>
+                  <SidebarMenu className="space-y-1">
+                    {filteredItems.map((item, i) => {
+                      const Icon = item.icon;
+                      return (
+                        <SidebarMenuItem key={i}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isItemActive(item.url)}
+                            className="w-full justify-start"
+                            tooltip={item.title}
+                            onClick={() => setOpenMobile(false)}
+                          >
+                            <Link
+                              href={item.url}
+                              className="h-full w-full flex items-center px-4 py-2"
+                            >
+                              {Icon && <Icon size={18} className="mr-2" />}
+                              <span className="sidebar-collapsed:hidden">
+                                {item.title}
+                              </span>
+                            </Link>
+                          </SidebarMenuButton>
+
+                          {item.items && item.items.length > 0 && (
+                            <div className="ml-4 mt-1 space-y-1">
+                              {item.items.map((subItem) => (
+                                <SidebarMenuButton
+                                  key={subItem.url}
+                                  asChild
+                                  isActive={isItemActive(subItem.url)}
+                                  size="sm"
+                                  className="w-full justify-start"
+                                  tooltip={subItem.title}
+                                  onClick={() => setOpenMobile(false)}
+                                >
+                                  <Link
+                                    href={subItem.url}
+                                    className="h-full w-full flex items-center px-4 py-1"
+                                  >
+                                    <span className="sidebar-collapsed:hidden text-sm">
+                                      {subItem.title}
+                                    </span>
+                                  </Link>
+                                </SidebarMenuButton>
+                              ))}
+                            </div>
+                          )}
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </SidebarGroup>
+              );
+            })}
+
+          {/* Common navigation for all roles */}
+          <Separator className="my-2" />
+          <SidebarGroup>
+            <SidebarMenu className="space-y-1">
+              {commonNav
+                .filter((item) => hasAccess(item.roles))
+                .map((item, i) => {
+                  const Icon = item.icon;
+                  return (
+                    <SidebarMenuItem key={i}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isItemActive(item.url)}
+                        className="w-full justify-start"
+                        tooltip={item.title}
+                        onClick={() => setOpenMobile(false)}
+                      >
+                        <Link
+                          href={item.url}
+                          className="h-full w-full flex items-center px-4 py-2"
+                        >
+                          {Icon && <Icon size={18} className="mr-2" />}
+                          <span className="sidebar-collapsed:hidden">
+                            {item.title}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+            </SidebarMenu>
+          </SidebarGroup>
+        </ScrollArea>
+      </SidebarContent>
+
+      <SidebarFooter className="p-2 border-t shrink-0">
+        <div className="flex items-center gap-3 p-2">
+          <Avatar className="h-8 w-8">
+            <AvatarImage
+              src={user?.avatar?.url}
+              alt={`${user?.firstName} ${user?.lastName}`}
+            />
+            <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
+              {getInitials(user?.firstName, user?.lastName)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-1 flex-col min-w-0">
+            <p className="text-sm font-medium truncate sidebar-collapsed:hidden">
+              {user?.firstName} {user?.lastName}
+            </p>
+            {/* user role */}
+            <p className="text-xs text-muted-foreground capitalize truncate sidebar-collapsed:hidden">
+              {getRoleDisplayName()}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => logout()}
+            disabled={isPending}
+            className="h-8 w-8"
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
+
+export default DashboardSidebar;
