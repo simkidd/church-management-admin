@@ -50,3 +50,31 @@ export interface ListUsersParams {
   role?: string;
   status?: string;
 }
+
+export interface RoleStats {
+  total: number;
+  roles: {
+    superAdmin: number;
+    admin: number;
+    instructor: number;
+    pastor: number;
+    member: number;
+  };
+  status: {
+    active: number;
+    inactive: number;
+    suspended: number;
+    banned: number;
+  };
+  verification: {
+    verified: number;
+    unverified: number;
+  };
+  percentages: {
+    superAdmin: string;
+    admin: string;
+    instructor: string;
+    pastor: string;
+    member: string;
+  };
+}

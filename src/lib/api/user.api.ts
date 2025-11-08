@@ -7,6 +7,7 @@ import {
   CreateUserData,
   IUser,
   ListUsersParams,
+  RoleStats,
   UpdateUserData,
 } from "@/interfaces/user.interface";
 
@@ -91,6 +92,12 @@ export const usersApi = {
     }>
   > => {
     const response = await api.delete(`/users/${id}/avatar`);
+    return response.data;
+  },
+
+  // Get roles stats
+  getRolesStats: async (): Promise<ApiResponse<RoleStats>> => {
+    const response = await api.get("/users/stats/roles");
     return response.data;
   },
 };

@@ -34,143 +34,32 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IUser } from "@/interfaces/user.interface";
+import { IUser, ListUsersParams } from "@/interfaces/user.interface";
 import { getUserInitials, getUserRoles } from "@/utils/helpers/user";
 import {
   Edit,
   MoreHorizontal,
+  RefreshCw,
   Search,
   Shield,
   Trash2,
   User,
+  Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import EditRolesForm from "./EditRolesForm";
 import RolesStats from "./RolesStats";
-
-// Mock data - replace with actual API calls
-const mockUsers: IUser[] = [
-  {
-    id: "1",
-    firstName: "John",
-    lastName: "Doe",
-    email: "john@church.org",
-    phone: "+1 (555) 123-4567",
-    gender: "male",
-    avatar: {
-      url: "",
-      publicId: "",
-    },
-    address: "123 Main St",
-    city: "New York",
-    state: "NY",
-    isVerified: true,
-    status: "active",
-    lastLogin: "2024-01-15T10:30:00Z",
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-15T10:30:00Z",
-    isAdmin: true,
-    isSuperAdmin: false,
-    isInstructor: false,
-    isPastor: true,
-  },
-  {
-    id: "2",
-    firstName: "Sarah",
-    lastName: "Johnson",
-    email: "sarah@church.org",
-    phone: "+1 (555) 123-4567",
-    gender: "female",
-    avatar: {
-      url: "",
-      publicId: "",
-    },
-    address: "456 Oak Ave",
-    city: "Los Angeles",
-    state: "CA",
-    isVerified: true,
-    status: "active",
-    lastLogin: "2024-01-14T08:15:00Z",
-    createdAt: "2024-01-02T00:00:00Z",
-    updatedAt: "2024-01-14T08:15:00Z",
-    isAdmin: false,
-    isSuperAdmin: false,
-    isInstructor: true,
-    isPastor: false,
-  },
-  {
-    id: "3",
-    firstName: "Mike",
-    lastName: "Chen",
-    email: "mike@church.org",
-    phone: "+1 (555) 123-4567",
-    gender: "male",
-    avatar: {
-      url: "",
-      publicId: "",
-    },
-    address: "789 Pine Rd",
-    city: "Chicago",
-    state: "IL",
-    isVerified: true,
-    status: "active",
-    lastLogin: "2024-01-15T14:20:00Z",
-    createdAt: "2024-01-03T00:00:00Z",
-    updatedAt: "2024-01-15T14:20:00Z",
-    isAdmin: false,
-    isSuperAdmin: false,
-    isInstructor: false,
-    isPastor: false,
-  },
-  {
-    id: "4",
-    firstName: "Pastor",
-    lastName: "David",
-    email: "david@church.org",
-    phone: "+1 (555) 123-4567",
-    gender: "male",
-    avatar: {
-      url: "",
-      publicId: "",
-    },
-    address: "321 Church St",
-    city: "Houston",
-    state: "TX",
-    isVerified: true,
-    status: "active",
-    lastLogin: "2024-01-13T09:45:00Z",
-    createdAt: "2024-01-04T00:00:00Z",
-    updatedAt: "2024-01-13T09:45:00Z",
-    isAdmin: false,
-    isSuperAdmin: false,
-    isInstructor: false,
-    isPastor: true,
-  },
-  {
-    id: "5",
-    firstName: "Emily",
-    lastName: "Davis",
-    email: "emily@church.org",
-    phone: "+1 (555) 123-4567",
-    gender: "female",
-    avatar: {
-      url: "",
-      publicId: "",
-    },
-    address: "654 Elm St",
-    city: "Phoenix",
-    state: "AZ",
-    isVerified: true,
-    status: "inactive",
-    lastLogin: "2024-01-10T11:20:00Z",
-    createdAt: "2024-01-05T00:00:00Z",
-    updatedAt: "2024-01-10T11:20:00Z",
-    isAdmin: false,
-    isSuperAdmin: false,
-    isInstructor: true,
-    isPastor: false,
-  },
-];
+import useUsers from "@/hooks/useUsers";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { debounce } from "@/utils/helpers/debounce";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const rolePermissions = {
   "super-admin": {
@@ -241,33 +130,48 @@ export const rolePermissions = {
 };
 
 export function RoleManagement() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRole, setSelectedRole] = useState("all");
+  const [filters, setFilters] = useState<ListUsersParams>({
+    page: 1,
+    limit: 10,
+  });
+  const { users, isPending, totalUsers, totalPages } = useUsers(filters);
+  const [searchInput, setSearchInput] = useState("");
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  // Filter users based on search and role
-  const filteredUsers = mockUsers.filter((user) => {
-    const matchesSearch =
-      `${user.firstName} ${user.lastName}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((searchValue: string) => {
+        setFilters((prev) => ({
+          ...prev,
+          search: searchValue.trim() || undefined,
+          page: 1,
+        }));
+      }, 500), // 500ms delay
+    []
+  );
 
-    const matchesRole =
-      selectedRole === "all" ||
-      (selectedRole === "super-admin" && user.isSuperAdmin) ||
-      (selectedRole === "admin" && user.isAdmin) ||
-      (selectedRole === "pastor" && user.isPastor) ||
-      (selectedRole === "instructor" && user.isInstructor) ||
-      (selectedRole === "member" &&
-        !user.isAdmin &&
-        !user.isSuperAdmin &&
-        !user.isPastor &&
-        !user.isInstructor);
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value);
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
-    return matchesSearch && matchesRole;
-  });
+  const handleRoleChange = (value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      role: value === "all" ? undefined : value,
+      page: 1,
+    }));
+  };
+
+  const handleResetFilters = () => {
+    setSearchInput("");
+    setFilters({ page: 1, limit: 10 });
+    debouncedSearch.cancel();
+  };
 
   // Get role badge
   const getRoleBadge = (role: string) => {
@@ -294,12 +198,12 @@ export function RoleManagement() {
     setSelectedUser(null);
   };
 
-  console.log("mock users", mockUsers);
+  const hasActiveFilters = filters.search || filters.role;
 
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <RolesStats users={mockUsers} />
+      <RolesStats />
 
       <Tabs defaultValue="users" className="space-y-6">
         <TabsList>
@@ -318,26 +222,38 @@ export function RoleManagement() {
                     <Input
                       placeholder="Search users..."
                       className="pl-10"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      value={searchInput}
+                      onChange={(e) => handleSearchChange(e.target.value)}
                     />
                   </div>
 
-                  <select
-                    className="flex h-10 w-full sm:w-40 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value)}
+                  <Select
+                    value={filters.role || "all"}
+                    onValueChange={handleRoleChange}
                   >
-                    <option value="all">All Roles</option>
-                    {Object.entries(rolePermissions).map(([key, role]) => (
-                      <option key={key} value={key}>
-                        {role.name}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-full sm:w-40">
+                      <SelectValue placeholder="Filter by role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Roles</SelectItem>
+                      <SelectItem value="super-admin">Super Admin</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="pastor">Pastor</SelectItem>
+                      <SelectItem value="instructor">Instructor</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <Button>Export Report</Button>
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    onClick={handleResetFilters}
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    Reset
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -351,91 +267,114 @@ export function RoleManagement() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Roles</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last Login</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={user.avatar?.url} />
-                            <AvatarFallback>
-                              {getUserInitials(user)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">
-                              {user.firstName} {user.lastName}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {user.email}
+              {isPending ? (
+                <Table>
+                  <TableBody>
+                    {[...Array(5)].map((_, rowIndex) => (
+                      <TableRow key={`skeleton-${rowIndex}`}>
+                        {[...Array(7)].map((_, colIndex) => (
+                          <TableCell key={colIndex}>
+                            <Skeleton className="h-6 w-full" />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : !users || users.length === 0 ? (
+                <EmptyState
+                  icon={Users}
+                  title="No users found"
+                  description="Try adjusting your filters or search terms."
+                  action={
+                    hasActiveFilters && (
+                      <Button
+                        variant="outline"
+                        onClick={handleResetFilters}
+                        className="mt-4"
+                      >
+                        Reset Filters
+                      </Button>
+                    )
+                  }
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Roles</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Last Login</TableHead>
+                      <TableHead className="w-[100px]">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={user.avatar?.url} />
+                              <AvatarFallback>
+                                {getUserInitials(user)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">
+                                {user.firstName} {user.lastName}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {user.email}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {getUserRoles(user).map((role) => getRoleBadge(role))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            user.status === "active" ? "default" : "secondary"
-                          }
-                        >
-                          {user.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(user.lastLogin).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => handleEditRoles(user)}
-                            >
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit Roles
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Remove Access
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              {filteredUsers.length === 0 && (
-                <div className="text-center py-12">
-                  <User className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No users found</h3>
-                  <p className="text-muted-foreground">
-                    {searchTerm || selectedRole !== "all"
-                      ? "Try adjusting your search terms or filters"
-                      : "No users available in the system"}
-                  </p>
-                </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {getUserRoles(user).map((role) =>
+                              getRoleBadge(role)
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              user.status === "active" ? "default" : "secondary"
+                            }
+                          >
+                            {user.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(user.lastLogin).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleEditRoles(user)}
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Roles
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-red-600">
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Remove Access
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </CardContent>
           </Card>
