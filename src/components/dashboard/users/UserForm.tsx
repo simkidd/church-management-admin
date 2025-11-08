@@ -156,11 +156,11 @@ export function UserForm({ initialData, isEditing = false }: UserFormProps) {
 
   const handleFormSubmit = (data: FormData) => {
     console.log("form data>>>", data);
-    // if (isEditing) {
-    //   updateUserMutation.mutate(data);
-    // } else {
+    if (isEditing) {
+      updateUserMutation.mutate(data);
+    } else {
       createUserMutation.mutate(data);
-    // }
+    }
   };
 
   const isLoading =

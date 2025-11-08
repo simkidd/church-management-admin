@@ -41,11 +41,10 @@ export interface CreateUserData {
   roles: string[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface UpdateUserData extends Partial<CreateUserData> {}
+export type UpdateUserData = Partial<CreateUserData>;
 
 export interface ListUsersParams {
-  page?: number;
+  page: number;
   limit?: number;
   search?: string;
   role?: string;

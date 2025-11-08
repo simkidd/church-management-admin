@@ -1,4 +1,7 @@
-import { ApiResponse } from "@/interfaces/response.interface";
+import {
+  ApiResponse,
+  PaginatedResponse,
+} from "@/interfaces/response.interface";
 import api from "../axios";
 import {
   CreateUserData,
@@ -11,9 +14,7 @@ export const usersApi = {
   // Get all users
   getUsers: async (
     params?: ListUsersParams
-  ): Promise<
-    ApiResponse<{ users: IUser[]; total: number; page: number; limit: number }>
-  > => {
+  ): Promise<ApiResponse<PaginatedResponse<IUser>>> => {
     const response = await api.get("/users", { params });
     return response.data;
   },
