@@ -182,7 +182,7 @@ export function UserManagement() {
                   className="flex items-center gap-2"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  Reset
+                  Reset Filters
                 </Button>
               )}
             </div>
@@ -216,11 +216,7 @@ export function UserManagement() {
               description="Try adjusting your filters or search terms."
               action={
                 hasActiveFilters && (
-                  <Button
-                    variant="outline"
-                    onClick={handleResetFilters}
-                    className="mt-4"
-                  >
+                  <Button variant="outline" onClick={handleResetFilters}>
                     Reset Filters
                   </Button>
                 )
