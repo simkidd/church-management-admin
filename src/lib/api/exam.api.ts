@@ -28,9 +28,7 @@ export const examsApi = {
   getExamById: async (
     id: string
   ): Promise<
-    ApiResponse<{
-      exam: IExam;
-    }>
+    ApiResponse<IExam>
   > => {
     const response = await api.get(`/exams/${id}`);
     return response.data;

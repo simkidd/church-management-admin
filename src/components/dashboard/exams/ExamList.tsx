@@ -11,6 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Pagination,
@@ -30,17 +36,53 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useExams from "@/hooks/useExams";
-import { ListExamsParams } from "@/interfaces/exam.interface";
+import { IExam, ListExamsParams } from "@/interfaces/exam.interface";
 import { cn } from "@/lib/utils";
 import { debounce } from "@/utils/helpers/debounce";
-import { Clock, FileText, RefreshCw, Search, Users } from "lucide-react";
+import {
+  Clock,
+  Edit,
+  Eye,
+  FilePenLine,
+  FileText,
+  MoreHorizontal,
+  RefreshCw,
+  Search,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
+
+const ActionComp = ({ exam }: { exam: IExam }) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href={`/dashboard/exams/${exam._id}`}>
+            <Eye className="h-4 w-4" />
+            View
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href={`/dashboard/exams/submissions/${exam._id}`}>
+            <FilePenLine className="h-4 w-4" />
+            Grade
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export function ExamList() {
   const [filters, setFilters] = useState<ListExamsParams>({
     page: 1,
-    limit: 10,
+    limit: 5,
   });
   const { exams, isPending, totalExams, totalPages } = useExams(filters);
   const [search, setSearch] = useState("");
@@ -142,11 +184,11 @@ export function ExamList() {
 
             {hasActiveFilters && (
               <Button
-                  variant="outline"
-                  onClick={handleResetFilters}
-                  className="flex items-center gap-2"
-                >
-                  <RefreshCw className="h-4 w-4" />
+                variant="outline"
+                onClick={handleResetFilters}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
                 Reset Filters
               </Button>
             )}
@@ -208,7 +250,9 @@ export function ExamList() {
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-muted-foreground" />
-                        {exam.title}
+                        <Link href={`/dashboard/exams/${exam._id}`}>
+                          {exam.title}
+                        </Link>
                       </div>
                     </TableCell>
                     <TableCell>{exam.course.title}</TableCell>
@@ -229,16 +273,7 @@ export function ExamList() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Link href={`/dashboard/exams/${exam._id}`}>
-                          <Button variant="outline" size="sm">
-                            View
-                          </Button>
-                        </Link>
-                        <Link href={`/dashboard/exams/submissions/${exam._id}`}>
-                          <Button size="sm">Grade</Button>
-                        </Link>
-                      </div>
+                      <ActionComp exam={exam} />
                     </TableCell>
                   </TableRow>
                 ))}

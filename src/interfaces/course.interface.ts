@@ -1,12 +1,10 @@
+import { IUser } from "./user.interface";
+
 export interface ICourse {
   _id: string;
   title: string;
   description: string;
-  instructor: {
-    _id: string;
-    name: string;
-    avatarUrl?: string;
-  };
+  instructor: IUser;
   lessons: ILesson[];
   thumbnail?: string;
   isPublished: boolean;
