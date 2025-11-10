@@ -109,7 +109,7 @@ const DashboardNavUser = ({ user }: { user: IUser }) => {
                     {user?.firstName} {user?.lastName}
                   </span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
+                    {user?.email}
                   </span>
                 </div>
               </div>
