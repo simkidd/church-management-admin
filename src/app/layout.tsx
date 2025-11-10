@@ -36,7 +36,13 @@ export default function RootLayout({
         <NextTopLoader color="var(--primary)" showSpinner={false} />
         <Providers>
           <Suspense fallback={<PageLoader />}>{children}</Suspense>
-          <Toaster position="top-right" expand={false} richColors closeButton />
+          <Toaster
+            position="top-right"
+            expand={false}
+            richColors
+            closeButton
+            swipeDirections={["top", "left", "right"]}
+          />
         </Providers>
       </body>
     </html>

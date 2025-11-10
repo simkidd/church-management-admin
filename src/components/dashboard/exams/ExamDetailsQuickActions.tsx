@@ -22,7 +22,7 @@ const ExamDetailsQuickActions = ({ exam }: { exam: IExam }) => {
       toast.success(`Exam ${action} successfully`, {
         description: `${exam.title} has been ${action}.`,
       });
-      
+
       queryClient.invalidateQueries({ queryKey: ["exam", exam._id] });
       queryClient.invalidateQueries({ queryKey: ["allExams"] });
     },
@@ -63,7 +63,7 @@ const ExamDetailsQuickActions = ({ exam }: { exam: IExam }) => {
       {exam.isPublished ? (
         <Button
           variant="outline"
-          className="h-24 w-full flex flex-col items-center justify-center gap-2 p-2 square-button border-yellow-200 bg-yellow-50 hover:bg-yellow-100 hover:text-yellow-900"
+          className="h-24 w-full flex flex-col items-center justify-center gap-2 p-2 border-yellow-200 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300 transition-colors"
           onClick={handleTogglePublish}
           disabled={isPublishing}
         >
@@ -74,7 +74,7 @@ const ExamDetailsQuickActions = ({ exam }: { exam: IExam }) => {
         </Button>
       ) : (
         <Button
-          className="h-24 w-full flex flex-col items-center justify-center gap-2 p-2 square-button bg-green-600 hover:bg-green-700 text-white"
+          className="h-24 w-full flex flex-col items-center justify-center gap-2 p-2 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 text-white transition-colors"
           onClick={handleTogglePublish}
           disabled={isPublishing}
         >

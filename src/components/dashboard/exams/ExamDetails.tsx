@@ -1,4 +1,5 @@
 "use client";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { IExam } from "@/interfaces/exam.interface";
 import { ApiResponse } from "@/interfaces/response.interface";
 import examsApi from "@/lib/api/exam.api";
@@ -18,16 +18,14 @@ import {
   ArrowLeft,
   BookOpen,
   Clock,
-  Edit,
   FileQuestion,
   FileText,
   Target,
-  Trash2,
   User,
 } from "lucide-react";
 import Link from "next/link";
+import ExamActions from "./ExamActions";
 import ExamDetailsQuickActions from "./ExamDetailsQuickActions";
-import { EmptyState } from "@/components/shared/EmptyState";
 import { ExamDetailsSkeleton } from "./ExamDetailsSkeleton";
 import ExamQuestionsList from "./ExamQuestionsList";
 
@@ -87,18 +85,8 @@ const ExamDetails = ({ id }: { id: string }) => {
             <h1 className="text-3xl font-bold tracking-tight">{exam.title}</h1>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Link href={`/dashboard/exams/${exam._id}/edit`}>
-            <Button variant="outline" size="sm">
-              <Edit className="h-4 w-4" />
-              Edit
-            </Button>
-          </Link>
-          <Button variant="destructive" size="sm">
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
-        </div>
+
+        <ExamActions exam={exam} />
       </div>
 
       {/* Exam Overview Cards */}
