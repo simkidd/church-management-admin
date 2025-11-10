@@ -1,7 +1,5 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -9,6 +7,8 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -21,28 +21,23 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth.store";
 import {
   Award,
-  BarChart3,
   Bell,
   BookOpen,
   Calendar,
-  CalendarDays,
   Church,
-  Clock,
   FileCheck,
-  FileText,
   GraduationCap,
   Home,
-  LogOut,
   Mic,
   Settings,
   Shield,
   TrendingUp,
   User,
-  Users,
-  Video,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import DashboardNavUser from "./DashboardNavUser";
 
 interface ISidebarMenu {
   title: string;
@@ -379,127 +374,103 @@ export function DashboardSidebar() {
 
               return (
                 <SidebarGroup key={groupIndex}>
-                  <SidebarMenu className="space-y-1">
-                    {filteredItems.map((item, i) => {
-                      const Icon = item.icon;
-                      return (
-                        <SidebarMenuItem key={i}>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={isItemActive(item.url)}
-                            className="w-full justify-start"
-                            tooltip={item.title}
-                            onClick={() => setOpenMobile(false)}
-                          >
-                            <Link
-                              href={item.url}
-                              className="h-full w-full flex items-center px-4 py-2"
+                  <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+                  <SidebarGroupContent>
+                    <SidebarMenu className="space-y-1">
+                      {filteredItems.map((item, i) => {
+                        const Icon = item.icon;
+                        return (
+                          <SidebarMenuItem key={i}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isItemActive(item.url)}
+                              className="w-full justify-start"
+                              tooltip={item.title}
+                              onClick={() => setOpenMobile(false)}
                             >
-                              {Icon && <Icon size={18} className="mr-2" />}
-                              <span className="sidebar-collapsed:hidden">
-                                {item.title}
-                              </span>
-                            </Link>
-                          </SidebarMenuButton>
+                              <Link
+                                href={item.url}
+                                className="h-full w-full flex items-center px-4 py-2"
+                              >
+                                {Icon && <Icon size={18} />}
+                                <span className="sidebar-collapsed:hidden">
+                                  {item.title}
+                                </span>
+                              </Link>
+                            </SidebarMenuButton>
 
-                          {item.items && item.items.length > 0 && (
-                            <div className="ml-4 mt-1 space-y-1">
-                              {item.items.map((subItem) => (
-                                <SidebarMenuButton
-                                  key={subItem.url}
-                                  asChild
-                                  isActive={isItemActive(subItem.url)}
-                                  size="sm"
-                                  className="w-full justify-start"
-                                  tooltip={subItem.title}
-                                  onClick={() => setOpenMobile(false)}
-                                >
-                                  <Link
-                                    href={subItem.url}
-                                    className="h-full w-full flex items-center px-4 py-1"
+                            {item.items && item.items.length > 0 && (
+                              <div className="ml-4 mt-1 space-y-1">
+                                {item.items.map((subItem) => (
+                                  <SidebarMenuButton
+                                    key={subItem.url}
+                                    asChild
+                                    isActive={isItemActive(subItem.url)}
+                                    size="sm"
+                                    className="w-full justify-start"
+                                    tooltip={subItem.title}
+                                    onClick={() => setOpenMobile(false)}
                                   >
-                                    <span className="sidebar-collapsed:hidden text-sm">
-                                      {subItem.title}
-                                    </span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              ))}
-                            </div>
-                          )}
-                        </SidebarMenuItem>
-                      );
-                    })}
-                  </SidebarMenu>
+                                    <Link
+                                      href={subItem.url}
+                                      className="h-full w-full flex items-center px-4 py-1"
+                                    >
+                                      <span className="sidebar-collapsed:hidden text-sm">
+                                        {subItem.title}
+                                      </span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                ))}
+                              </div>
+                            )}
+                          </SidebarMenuItem>
+                        );
+                      })}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
                 </SidebarGroup>
               );
             })}
 
-          {/* Common navigation for all roles */}
-          <Separator className="my-2" />
-          <SidebarGroup>
-            <SidebarMenu className="space-y-1">
-              {commonNav
-                .filter((item) => hasAccess(item.roles))
-                .map((item, i) => {
-                  const Icon = item.icon;
-                  return (
-                    <SidebarMenuItem key={i}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isItemActive(item.url)}
-                        className="w-full justify-start"
-                        tooltip={item.title}
-                        onClick={() => setOpenMobile(false)}
-                      >
-                        <Link
-                          href={item.url}
-                          className="h-full w-full flex items-center px-4 py-2"
-                        >
-                          {Icon && <Icon size={18} className="mr-2" />}
-                          <span className="sidebar-collapsed:hidden">
-                            {item.title}
-                          </span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-            </SidebarMenu>
-          </SidebarGroup>
         </ScrollArea>
+          {/* Common navigation for all roles */}
+          <Separator className="" />
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-1">
+                {commonNav
+                  .filter((item) => hasAccess(item.roles))
+                  .map((item, i) => {
+                    const Icon = item.icon;
+                    return (
+                      <SidebarMenuItem key={i}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isItemActive(item.url)}
+                          className="w-full justify-start"
+                          tooltip={item.title}
+                          onClick={() => setOpenMobile(false)}
+                        >
+                          <Link
+                            href={item.url}
+                            className="h-full w-full flex items-center px-4 py-2"
+                          >
+                            {Icon && <Icon size={18} />}
+                            <span className="sidebar-collapsed:hidden">
+                              {item.title}
+                            </span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-2 border-t shrink-0">
-        <div className="flex items-center gap-3 p-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={user?.avatar?.url}
-              alt={`${user?.firstName} ${user?.lastName}`}
-            />
-            <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
-              {getInitials(user?.firstName, user?.lastName)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-1 flex-col min-w-0">
-            <p className="text-sm font-medium truncate sidebar-collapsed:hidden">
-              {user?.firstName} {user?.lastName}
-            </p>
-            {/* user role */}
-            <p className="text-xs text-muted-foreground capitalize truncate sidebar-collapsed:hidden">
-              {getRoleDisplayName()}
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => logout()}
-            disabled={isPending}
-            className="h-8 w-8"
-            title="Logout"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
+        <DashboardNavUser user={user!} />
       </SidebarFooter>
     </Sidebar>
   );
