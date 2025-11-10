@@ -40,19 +40,20 @@ export const authApi = {
   //   return data;
   // },
 
-  // forgotPassword: async (
-  //   payload: ForgotPasswordPayload
-  // ): Promise<{ message: string }> => {
-  //   const { data } = await api.post("/auth/forgot-password", payload);
-  //   return data;
-  // },
+  forgotPassword: async (payload: {
+    email: string;
+  }): Promise<{ message: string }> => {
+    const { data } = await api.post("/auth/forgot-password", payload);
+    return data;
+  },
 
-  // resetPassword: async (
-  //   payload: ResetPasswordPayload
-  // ): Promise<{ message: string }> => {
-  //   const { data } = await api.post("/auth/reset-password", payload);
-  //   return data;
-  // },
+  resetPassword: async (payload: {
+    token: string;
+    newPassword: string;
+  }): Promise<{ message: string }> => {
+    const { data } = await api.post("/auth/reset-password", payload);
+    return data;
+  },
 
   // Protected routes
   logout: async (refreshToken?: string): Promise<{ message: string }> => {
