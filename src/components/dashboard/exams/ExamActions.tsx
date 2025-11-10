@@ -16,11 +16,12 @@ import { ApiErrorResponse } from "@/interfaces/response.interface";
 import examsApi from "@/lib/api/exam.api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Edit, Loader2, Trash2 } from "lucide-react";
-import Link from "next/link";
+import { Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+
+import EditExamForm from "./EditExamForm";
 
 interface ExamActionsProps {
   exam: IExam;
@@ -61,12 +62,7 @@ const ExamActions = ({ exam }: ExamActionsProps) => {
   return (
     <div className="flex gap-2">
       {/* Edit Button */}
-      <Button asChild variant="outline" size="sm">
-        <Link href={`/dashboard/exams/${exam._id}/edit`}>
-          <Edit className="h-4 w-4 " />
-          Edit
-        </Link>
-      </Button>
+      <EditExamForm exam={exam} />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog
@@ -74,14 +70,16 @@ const ExamActions = ({ exam }: ExamActionsProps) => {
         onOpenChange={setIsDeleteDialogOpen}
       >
         <AlertDialogTrigger asChild>
-          <Button
-            variant="destructive"
-            size="sm"
-            disabled={deleteMutation.isPending}
-          >
-            <Trash2 className="h-4 w-4 " />
-            Delete
-          </Button>
+          {(exam.submissionCount || 0) > 0 ? null : (
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={deleteMutation.isPending}
+            >
+              <Trash2 className="h-4 w-4 " />
+              Delete
+            </Button>
+          )}
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>

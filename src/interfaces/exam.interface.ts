@@ -11,6 +11,7 @@ export interface IExam {
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
+  submissionCount?: number;
 }
 
 export interface IQuestion {
