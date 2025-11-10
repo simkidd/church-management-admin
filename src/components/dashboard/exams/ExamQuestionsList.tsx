@@ -1,9 +1,58 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { IExam } from "@/interfaces/exam.interface";
+import { ApiErrorResponse } from "@/interfaces/response.interface";
+import examsApi from "@/lib/api/exam.api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import React from "react";
+import { toast } from "sonner";
+import EditQuestionForm from "./EditQuestionForm";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Loader2, Trash2 } from "lucide-react";
 
 const ExamQuestionsList = ({ exam }: { exam: IExam }) => {
+  const queryClient = useQueryClient();
+
+  const deleteQuestionMutation = useMutation({
+    mutationFn: ({
+      examId,
+      questionId,
+    }: {
+      examId: string;
+      questionId: string;
+    }) => examsApi.deleteQuestion(examId, questionId),
+    onSuccess: (data, variables) => {
+      toast.success("Question deleted successfully", {
+        description: data.data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ["exam", exam._id] });
+    },
+    onError: (error: AxiosError<ApiErrorResponse>) => {
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to delete question. Please try again.";
+      toast.error("Delete Failed", {
+        description: errorMessage,
+      });
+    },
+  });
+
+  const handleDeleteQuestion = (questionId: string) => {
+    deleteQuestionMutation.mutate({ examId: exam._id, questionId });
+  };
+
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
       {exam.questions?.map((question, index) => (
@@ -16,6 +65,63 @@ const ExamQuestionsList = ({ exam }: { exam: IExam }) => {
                   {question.type.replace("-", " ")}
                 </Badge>
                 <Badge variant="secondary">{question.points} pts</Badge>
+              </div>
+
+              <div className="flex gap-1">
+                {/* Edit Question Dialog */}
+                <EditQuestionForm exam={exam} question={question} />
+
+                {/* Delete Question Confirmation */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={deleteQuestionMutation.isPending}
+                    >
+                      {deleteQuestionMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you sure you want to delete this question?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete the question:
+                        <p className="font-medium mt-2">
+                          &quot;{question.questionText}&quot;
+                        </p>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel
+                        disabled={deleteQuestionMutation.isPending}
+                      >
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteQuestion(question._id)}
+                        disabled={deleteQuestionMutation.isPending}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleteQuestionMutation.isPending ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            Deleting...
+                          </>
+                        ) : (
+                          "Yes, delete question"
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
 
@@ -91,13 +197,15 @@ const ExamQuestionsList = ({ exam }: { exam: IExam }) => {
                 </div>
               )}
 
-            {question.type === "short-answer" &&
-              (!question.keywords || question.keywords.length === 0) && (
-                <div className="text-sm text-muted-foreground italic bg-yellow-50 p-3 rounded-md border border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700 dark:text-yellow-300">
-                  ⚠️ This question requires manual grading (no keywords
-                  provided)
+            {
+              question.type === "short-answer" && (
+                (!question.keywords || question.keywords.length === 0) && (
+                <div className="text-sm text-muted-foreground italic bg-yellow-50 p-3 rounded-md border border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700 dark:text-yellow-300 mt-2">
+                  This question requires manual grading (no keywords provided)
                 </div>
-              )}
+              )
+              )
+            }
           </CardContent>
         </Card>
       ))}

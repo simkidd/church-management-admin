@@ -14,6 +14,7 @@ import {
   ListExamsParams,
   ListExamSubmissonsParams,
 } from "@/interfaces/exam.interface";
+import { QuestionFormData } from "@/components/dashboard/exams/AddQuestionForm";
 
 export const examsApi = {
   // Get all exams
@@ -25,11 +26,7 @@ export const examsApi = {
   },
 
   // Get exam by ID
-  getExamById: async (
-    id: string
-  ): Promise<
-    ApiResponse<IExam>
-  > => {
+  getExamById: async (id: string): Promise<ApiResponse<IExam>> => {
     const response = await api.get(`/exams/${id}`);
     return response.data;
   },
@@ -123,6 +120,36 @@ export const examsApi = {
     const response = await api.put(
       `/exams/submissions/${submissionId}/grade`,
       data
+    );
+    return response.data;
+  },
+
+  addQuestion: async (
+    examId: string,
+    data: QuestionFormData
+  ): Promise<ApiResponse<{ exam: IExam }>> => {
+    const response = await api.post(`/exams/${examId}/questions/add`, data);
+    return response.data;
+  },
+
+  updateQuestion: async (
+    examId: string,
+    questionId: string,
+    updates: Record<string, unknown>
+  ): Promise<ApiResponse<{ exam: IExam }>> => {
+    const response = await api.put(
+      `/exams/${examId}/questions/${questionId}`,
+      updates
+    );
+    return response.data;
+  },
+
+  deleteQuestion: async (
+    examId: string,
+    questionId: string
+  ): Promise<ApiResponse<{ message: string }>> => {
+    const response = await api.delete(
+      `/exams/${examId}/questions/${questionId}`
     );
     return response.data;
   },

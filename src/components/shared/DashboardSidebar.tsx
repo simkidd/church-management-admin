@@ -33,7 +33,7 @@ import {
   Shield,
   TrendingUp,
   User,
-  Users
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -376,7 +376,7 @@ export function DashboardSidebar() {
                 <SidebarGroup key={groupIndex}>
                   <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
                   <SidebarGroupContent>
-                    <SidebarMenu className="space-y-1">
+                    <SidebarMenu>
                       {filteredItems.map((item, i) => {
                         const Icon = item.icon;
                         return (
@@ -390,7 +390,7 @@ export function DashboardSidebar() {
                             >
                               <Link
                                 href={item.url}
-                                className="h-full w-full flex items-center px-4 py-2"
+                                className="h-full w-full flex items-center "
                               >
                                 {Icon && <Icon size={18} />}
                                 <span className="sidebar-collapsed:hidden">
@@ -413,7 +413,7 @@ export function DashboardSidebar() {
                                   >
                                     <Link
                                       href={subItem.url}
-                                      className="h-full w-full flex items-center px-4 py-1"
+                                      className="h-full w-full flex items-center "
                                     >
                                       <span className="sidebar-collapsed:hidden text-sm">
                                         {subItem.title}
@@ -431,42 +431,41 @@ export function DashboardSidebar() {
                 </SidebarGroup>
               );
             })}
-
         </ScrollArea>
-          {/* Common navigation for all roles */}
-          <Separator className="" />
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
-                {commonNav
-                  .filter((item) => hasAccess(item.roles))
-                  .map((item, i) => {
-                    const Icon = item.icon;
-                    return (
-                      <SidebarMenuItem key={i}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={isItemActive(item.url)}
-                          className="w-full justify-start"
-                          tooltip={item.title}
-                          onClick={() => setOpenMobile(false)}
+        {/* Common navigation for all roles */}
+        <Separator className="" />
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {commonNav
+                .filter((item) => hasAccess(item.roles))
+                .map((item, i) => {
+                  const Icon = item.icon;
+                  return (
+                    <SidebarMenuItem key={i}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isItemActive(item.url)}
+                        className="w-full justify-start"
+                        tooltip={item.title}
+                        onClick={() => setOpenMobile(false)}
+                      >
+                        <Link
+                          href={item.url}
+                          className="h-full w-full flex items-center "
                         >
-                          <Link
-                            href={item.url}
-                            className="h-full w-full flex items-center px-4 py-2"
-                          >
-                            {Icon && <Icon size={18} />}
-                            <span className="sidebar-collapsed:hidden">
-                              {item.title}
-                            </span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+                          {Icon && <Icon size={18} />}
+                          <span className="sidebar-collapsed:hidden">
+                            {item.title}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-2 border-t shrink-0">

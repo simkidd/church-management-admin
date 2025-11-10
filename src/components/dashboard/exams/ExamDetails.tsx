@@ -28,6 +28,7 @@ import ExamActions from "./ExamActions";
 import ExamDetailsQuickActions from "./ExamDetailsQuickActions";
 import { ExamDetailsSkeleton } from "./ExamDetailsSkeleton";
 import ExamQuestionsList from "./ExamQuestionsList";
+import AddQuestionForm from "./AddQuestionForm";
 
 const ExamDetails = ({ id }: { id: string }) => {
   const { data, isLoading, error } = useQuery<ApiResponse<IExam>>({
@@ -208,6 +209,8 @@ const ExamDetails = ({ id }: { id: string }) => {
         <CardHeader>
           <CardTitle>Questions ({exam.questions?.length || 0})</CardTitle>
           <CardDescription>All questions in this exam</CardDescription>
+
+           <AddQuestionForm exam={exam} />
         </CardHeader>
         <CardContent>
           <ExamQuestionsList exam={exam} />
