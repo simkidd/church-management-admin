@@ -35,10 +35,16 @@ export const authApi = {
     return data;
   },
 
-  // refreshToken: async (payload: RefreshTokenPayload): Promise<AuthResponse> => {
-  //   const { data } = await api.post("/auth/refresh", payload);
-  //   return data;
-  // },
+  refreshToken: async (payload: {
+    refreshToken: string;
+  }): Promise<
+    ApiResponse<{
+      accessToken: string;
+    }>
+  > => {
+    const { data } = await api.post("/auth/refresh", payload);
+    return data;
+  },
 
   forgotPassword: async (payload: {
     email: string;

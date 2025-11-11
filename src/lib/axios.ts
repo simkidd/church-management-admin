@@ -5,6 +5,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import cookies from "js-cookie";
+import authApi from "./api/auth.api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -12,7 +13,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 const AUTH_ENDPOINTS = [
   "/auth/login",
   "/auth/register",
-  "/auth/refresh",
+  // "/auth/refresh",
   "/auth/forgot-password",
   "/auth/reset-password",
 ];
@@ -71,10 +72,8 @@ api.interceptors.response.use(
             throw new Error("No refresh token");
           }
 
-          const response = await axios.post(`${API_URL}/auth/refresh`, {
-            refreshToken,
-          });
-          const { accessToken } = response.data.data;
+          const res = await authApi.refreshToken({ refreshToken });
+          const { accessToken } = res.data;
 
           cookies.set(TOKEN_NAME, accessToken);
 
