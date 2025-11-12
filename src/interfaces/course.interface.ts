@@ -1,25 +1,41 @@
+// src/interfaces/course.interface.ts
+
 export interface ICourse {
   _id: string;
   title: string;
   description: string;
-  instructor: {
-    _id: string;
-    name: string;
-    avatarUrl?: string;
-  };
-  lessons: ILesson[];
-  thumbnail?: string;
-  isPublished: boolean;
-  enrolledStudents: string[];
-  createdAt: string;
-  updatedAt: string;
+  instructor?: string;
+  duration?: string;
+  lessons?: number;
+  students?: number;
+  category?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  image?: string;
 }
 
-export interface ILesson {
-  _id: string;
+export interface CreateCourseData {
   title: string;
-  content: string;
-  videoUrl?: string;
-  duration?: number;
-  order: number;
+  description: string;
+  category: string;
+  duration?: string;
+  instructor?: string;
+  image?: File | string;
+}
+
+export interface UpdateCourseData {
+  title?: string;
+  description?: string;
+  category?: string;
+  duration?: string;
+  instructor?: string;
+  image?: File | string;
+}
+export interface ListCourseParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }

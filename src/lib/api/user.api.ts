@@ -4,78 +4,79 @@ import {
 } from "@/interfaces/response.interface";
 import api from "../axios";
 import {
-  CreateUserData,
-  IUser,
-  ListUsersParams,
-  RoleStats,
-  UpdateUserData,
-} from "@/interfaces/user.interface";
+  ICourse,
+  CreateCourseData,
+  UpdateCourseData,
+  ListCourseParams,
+} from "@/interfaces/course.interface";
 
-export const usersApi = {
-  // Get all users
-  getUsers: async (
-    params?: ListUsersParams
-  ): Promise<ApiResponse<PaginatedResponse<IUser>>> => {
-    const response = await api.get("/users", { params });
+export const courseApi = {
+  // 📚 Get all courses (with pagination and filters)
+  getCourses: async (
+    params?: ListCourseParams
+  ): Promise<ApiResponse<PaginatedResponse<ICourse>>> => {
+    const response = await api.get("/courses", { params });
     return response.data;
   },
 
-  // Get user by ID
-  getUserById: async (
+  // 📘 Get course by ID
+  getCourseById: async (
     id: string
   ): Promise<
     ApiResponse<{
-      user: IUser;
+      course: ICourse;
     }>
   > => {
-    const response = await api.get(`/users/${id}`);
+    const response = await api.get(`/courses/${id}`);
     return response.data;
   },
 
-  // Create user
-  createUser: async (
-    data: CreateUserData
+  // ✳️ Create new course
+  createCourse: async (
+    data: CreateCourseData
   ): Promise<
     ApiResponse<{
-      user: IUser;
+      course: ICourse;
     }>
   > => {
-    const response = await api.post("/users/create", data);
+    const response = await api.post("/courses/create", data);
     return response.data;
   },
 
-  // Update user
-  updateUser: async (
+  // 📝 Update existing course
+  updateCourse: async (
     id: string,
-    data: UpdateUserData
+    data: UpdateCourseData
   ): Promise<
     ApiResponse<{
-      user: IUser;
+      course: ICourse;
     }>
   > => {
-    const response = await api.put(`/users/${id}/update`, data);
+    const response = await api.put(`/courses/${id}/update`, data);
     return response.data;
   },
 
-  // Delete user
-  deleteUser: async (id: string): Promise<ApiResponse<{ message: string }>> => {
-    const response = await api.delete(`/users/${id}`);
+  // ❌ Delete course
+  deleteCourse: async (
+    id: string
+  ): Promise<ApiResponse<{ message: string }>> => {
+    const response = await api.delete(`/courses/${id}`);
     return response.data;
   },
 
-  // Update user avatar
-  updateUserAvatar: async (
+  // 🖼️ Upload or update course image
+  updateCourseImage: async (
     id: string,
-    avatarFile: File
+    imageFile: File
   ): Promise<
     ApiResponse<{
-      user: IUser;
+      course: ICourse;
     }>
   > => {
     const formData = new FormData();
-    formData.append("avatar", avatarFile);
+    formData.append("image", imageFile);
 
-    const response = await api.patch(`/users/${id}/avatar`, formData, {
+    const response = await api.patch(`/courses/${id}/image`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -83,23 +84,17 @@ export const usersApi = {
     return response.data;
   },
 
-  // Delete user avatar
-  deleteUserAvatar: async (
+  // 🚫 Delete course image
+  deleteCourseImage: async (
     id: string
   ): Promise<
     ApiResponse<{
-      user: IUser;
+      course: ICourse;
     }>
   > => {
-    const response = await api.delete(`/users/${id}/avatar`);
-    return response.data;
-  },
-
-  // Get roles stats
-  getRolesStats: async (): Promise<ApiResponse<RoleStats>> => {
-    const response = await api.get("/users/stats/roles");
+    const response = await api.delete(`/courses/${id}/image`);
     return response.data;
   },
 };
 
-export default usersApi;
+export default courseApi;
