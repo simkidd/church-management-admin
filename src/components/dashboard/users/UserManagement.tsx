@@ -36,7 +36,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import useUsers from "@/hooks/useUsers";
-import { ListUsersParams } from "@/interfaces/user.interface";
+import { IUser, ListUsersParams } from "@/interfaces/user.interface";
 import {
   Select,
   SelectContent,
@@ -59,6 +59,30 @@ import { getPaginationRange } from "@/components/shared/DataTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { debounce } from "@/utils/helpers/debounce";
+
+const ActionComp = ({ user }: { user: IUser }) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <Link href={`/dashboard/users/${user.id}`}>
+          <DropdownMenuItem>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </DropdownMenuItem>
+        </Link>
+        <DropdownMenuItem className="text-red-600">
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export function UserManagement() {
   const [filters, setFilters] = useState<ListUsersParams>({
@@ -182,7 +206,7 @@ export function UserManagement() {
                   className="flex items-center gap-2"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  Reset
+                  Reset Filters
                 </Button>
               )}
             </div>
@@ -216,11 +240,7 @@ export function UserManagement() {
               description="Try adjusting your filters or search terms."
               action={
                 hasActiveFilters && (
-                  <Button
-                    variant="outline"
-                    onClick={handleResetFilters}
-                    className="mt-4"
-                  >
+                  <Button variant="outline" onClick={handleResetFilters}>
                     Reset Filters
                   </Button>
                 )
@@ -277,25 +297,7 @@ export function UserManagement() {
                           : "Never"}
                       </TableCell>
                       <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <Link href={`/dashboard/users/${user.id}`}>
-                              <DropdownMenuItem>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit
-                              </DropdownMenuItem>
-                            </Link>
-                            <DropdownMenuItem className="text-red-600">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <ActionComp user={user} />
                       </TableCell>
                     </TableRow>
                   ))

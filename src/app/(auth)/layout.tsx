@@ -4,8 +4,16 @@ export default async function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <div>{children}</div>
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 px-4">
+      <div className="w-full max-w-md">
+        {/* Logo/Brand */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-primary mb-2">
+            Church Management
+          </h1>
+        </div>
+        <div>{children}</div>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,3 @@
-// src/interfaces/course.interface.ts
-
 import { IUser } from "./user.interface";
 
 export interface ICourse {
