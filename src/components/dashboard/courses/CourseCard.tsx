@@ -2,8 +2,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ICourse } from "@/interfaces/course.interface";
-import { BookOpen, Clock } from "lucide-react";
+import { BookOpen, Clock, Edit, MoreHorizontal, Trash2 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -58,9 +64,20 @@ const CourseCard = ({ course }: { course: ICourse }) => {
               View
             </Button>
           </Link>
-          <Link href={`/dashboard/courses/${course._id}`}>
-            <Button size="sm">Manage</Button>
-          </Link>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem variant="destructive" className="cursor-pointer">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardContent>
     </Card>

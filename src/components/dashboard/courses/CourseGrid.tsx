@@ -22,6 +22,7 @@ import CourseCard from "./CourseCard";
 import { debounce } from "@/utils/helpers/debounce";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CourseCardSkeleton } from "./CourseCardSkeleton";
 
 export function CourseGrid() {
   const [filters, setFilters] = useState<ListCourseParams>({
@@ -131,15 +132,21 @@ export function CourseGrid() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Courses ({totalCourses})</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div>
+        <div className="pb-6">
+          <div className="leading-none font-semibold">
+            {isPending ? (
+              <Skeleton className="h-6 w-32" />
+            ) : (
+              `Courses (${totalCourses})`
+            )}
+          </div>
+        </div>
+        <div>
           {isPending ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} />
+                <CourseCardSkeleton key={i} />
               ))}
             </div>
           ) : !courses || courses.length === 0 ? (
@@ -149,11 +156,7 @@ export function CourseGrid() {
               description="Try adjusting your filters or search terms."
               action={
                 hasActiveFilters && (
-                  <Button
-                    variant="outline"
-                    onClick={handleResetFilters}
-                    className="mt-4"
-                  >
+                  <Button variant="outline" onClick={handleResetFilters}>
                     Reset Filters
                   </Button>
                 )
@@ -166,8 +169,8 @@ export function CourseGrid() {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

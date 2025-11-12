@@ -198,7 +198,13 @@ export function ExamList() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Exams ({totalExams})</CardTitle>
+          <CardTitle>
+            {isPending ? (
+              <Skeleton className="h-6 w-32" />
+            ) : (
+              `All Exams (${totalExams})`
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isPending ? (
