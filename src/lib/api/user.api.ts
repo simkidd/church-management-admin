@@ -100,6 +100,17 @@ export const usersApi = {
     const response = await api.get("/users/stats/roles");
     return response.data;
   },
+
+  /**
+   * Get instructors list (for dropdowns)
+   */
+  getInstructorsList: async (params?: {
+    search?: string;
+    status?: string;
+  }): Promise<ApiResponse<IUser[]>> => {
+    const response = await api.get("/users/instructors/list", { params });
+    return response.data;
+  },
 };
 
 export default usersApi;

@@ -1,7 +1,6 @@
 "use client";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -24,11 +23,11 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
+import AddQuestionForm from "./AddQuestionForm";
 import ExamActions from "./ExamActions";
 import ExamDetailsQuickActions from "./ExamDetailsQuickActions";
 import { ExamDetailsSkeleton } from "./ExamDetailsSkeleton";
 import ExamQuestionsList from "./ExamQuestionsList";
-import AddQuestionForm from "./AddQuestionForm";
 
 const ExamDetails = ({ id }: { id: string }) => {
   const { data, isLoading, error } = useQuery<ApiResponse<IExam>>({
@@ -73,21 +72,30 @@ const ExamDetails = ({ id }: { id: string }) => {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-6">
       {/* Header with Actions */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" asChild>
-            <Link href="/dashboard/exams">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">{exam.title}</h1>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <Link
+            href="/dashboard/exams"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Exams
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <ExamActions exam={exam} />
           </div>
         </div>
 
-        <ExamActions exam={exam} />
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold">{exam.title}</h1>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Exam Overview Cards */}
@@ -210,7 +218,7 @@ const ExamDetails = ({ id }: { id: string }) => {
           <CardTitle>Questions ({exam.questions?.length || 0})</CardTitle>
           <CardDescription>All questions in this exam</CardDescription>
 
-           <AddQuestionForm exam={exam} />
+          <AddQuestionForm exam={exam} />
         </CardHeader>
         <CardContent>
           <ExamQuestionsList exam={exam} />

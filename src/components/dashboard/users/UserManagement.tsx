@@ -216,7 +216,13 @@ export function UserManagement() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Users ({totalUsers})</CardTitle>
+          <CardTitle>
+            {isPending ? (
+              <Skeleton className="h-6 w-32" />
+            ) : (
+              `All Users (${totalUsers})`
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isPending ? (

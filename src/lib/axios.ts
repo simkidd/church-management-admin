@@ -13,7 +13,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 const AUTH_ENDPOINTS = [
   "/auth/login",
   "/auth/register",
-  // "/auth/refresh",
+  "/auth/refresh",
   "/auth/forgot-password",
   "/auth/reset-password",
 ];
