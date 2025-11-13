@@ -101,12 +101,6 @@ const navGroups: INavGroup[] = [
         icon: BookOpen,
       },
       {
-        title: "My Courses",
-        url: "/dashboard/courses/my-courses",
-        roles: ["super-admin", "admin", "instructor"],
-        icon: GraduationCap,
-      },
-      {
         title: "Enrollments",
         url: "/dashboard/courses/enrollments",
         roles: ["super-admin", "admin", "instructor"],
