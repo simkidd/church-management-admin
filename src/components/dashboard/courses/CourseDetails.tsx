@@ -22,6 +22,7 @@ import {
   Edit,
   Eye,
   EyeOff,
+  ImageIcon,
   Loader2,
   MoreVertical,
   Trash2,
@@ -47,6 +48,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import CourseForm from "./CourseForm";
+import Image from "next/image";
 
 const CourseDetails = ({ courseId }: { courseId: string }) => {
   const queryClient = useQueryClient();
@@ -130,6 +132,11 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
           title="Course Not Found"
           description="The courser you're looking for doesn't exist or you
                 don't have permission to view it."
+          action={
+            <Button asChild>
+              <Link href={"/dashboard/courses"}>Back to Courses</Link>
+            </Button>
+          }
         />
       </div>
     );
@@ -205,10 +212,45 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
             </div>
           </div>
 
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold">{course.title}</h1>
+          {/* Course Header with Thumbnail */}
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <div className="flex items-start gap-6">
+                {/* Thumbnail */}
+                <div className="shrink-0">
+                  {course.thumbnail?.url ? (
+                    <div className="relative w-32 h-32 rounded-lg overflow-hidden border">
+                      <Image
+                        src={course.thumbnail.url}
+                        alt={course.title}
+                        fill
+                        className="object-cover"
+                        sizes="128px"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-32 h-32 rounded-lg border-2 border-dashed border-muted flex items-center justify-center">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Course Info */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-3xl font-bold capitalize">
+                      {course.title}
+                    </h1>
+                    {isPublishing && (
+                      <Badge variant="secondary" className="animate-pulse">
+                        Updating...
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground text-lg mb-4">
+                    {course.description}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
