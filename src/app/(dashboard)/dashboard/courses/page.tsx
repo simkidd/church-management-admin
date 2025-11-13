@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import CourseForm from "@/components/dashboard/courses/CourseForm";
 import { CourseGrid } from "@/components/dashboard/courses/CourseGrid";
+import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
@@ -16,12 +16,13 @@ export default function CoursesPage() {
             Manage all courses and lessons
           </p>
         </div>
-        <Link href="/dashboard/courses/create">
+
+        <CourseForm>
           <Button>
             <Plus className="h-4 w-4" />
             Create Course
           </Button>
-        </Link>
+        </CourseForm>
       </div>
 
       <CourseGrid />

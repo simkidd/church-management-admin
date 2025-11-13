@@ -1,14 +1,12 @@
 import {
+  ICourse,
+  ListCourseParams
+} from "@/interfaces/course.interface";
+import {
   ApiResponse,
   PaginatedResponse,
 } from "@/interfaces/response.interface";
 import api from "../axios";
-import {
-  ICourse,
-  ListCourseParams,
-  CreateCourseData,
-  UpdateCourseData,
-} from "@/interfaces/course.interface";
 
 export const courseApi = {
   //  GET all courses
@@ -20,27 +18,33 @@ export const courseApi = {
   },
 
   // GET single course by ID
-  getCourseById: async (
-    id: string
-  ): Promise<ApiResponse<{ course: ICourse }>> => {
+  getCourseById: async (id: string): Promise<ApiResponse<ICourse>> => {
     const response = await api.get(`/courses/${id}`);
     return response.data;
   },
 
   //  CREATE a new course
   createCourse: async (
-    data: CreateCourseData
+    data: FormData
   ): Promise<ApiResponse<{ course: ICourse }>> => {
-    const response = await api.post("/courses/create", data);
+    const response = await api.post("/courses/create", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   },
 
   //  UPDATE a course
   updateCourse: async (
     id: string,
-    data: UpdateCourseData
+    data: FormData
   ): Promise<ApiResponse<{ course: ICourse }>> => {
-    const response = await api.put(`/courses/${id}/update`, data);
+    const response = await api.put(`/courses/${id}/update`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   },
 
@@ -48,7 +52,7 @@ export const courseApi = {
   deleteCourse: async (
     id: string
   ): Promise<ApiResponse<{ message: string }>> => {
-    const response = await api.delete(`/courses/${id}`);
+    const response = await api.delete(`/courses/${id}/delete`);
     return response.data;
   },
 };

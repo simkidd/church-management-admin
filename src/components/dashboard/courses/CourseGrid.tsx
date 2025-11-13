@@ -1,28 +1,27 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Search,
-  Users,
-  Clock,
-  BookOpen,
-  Plus,
-  Loader2,
-  RefreshCw,
-} from "lucide-react";
-import Link from "next/link";
-import { ListCourseParams, ICourse } from "@/interfaces/course.interface";
-import { courseApi } from "@/lib/api/course.api";
-import useCourses from "@/hooks/use-courses";
-import CourseCard from "./CourseCard";
-import { debounce } from "@/utils/helpers/debounce";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import useCourses from "@/hooks/use-courses";
+import { ListCourseParams } from "@/interfaces/course.interface";
+import { debounce } from "@/utils/helpers/debounce";
+import { BookOpen, RefreshCw, Search } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import CourseCard from "./CourseCard";
 import { CourseCardSkeleton } from "./CourseCardSkeleton";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { getPaginationRange } from "@/components/shared/DataTable";
+import { cn } from "@/lib/utils";
 
 export function CourseGrid() {
   const [filters, setFilters] = useState<ListCourseParams>({
@@ -133,22 +132,18 @@ export function CourseGrid() {
       </Card>
 
       <div>
-        <div className="pb-6">
-          <div className="leading-none font-semibold">
-            {isPending ? (
-              <Skeleton className="h-6 w-32" />
-            ) : (
-              `Courses (${totalCourses})`
-            )}
-          </div>
-        </div>
         <div>
           {isPending ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, i) => (
-                <CourseCardSkeleton key={i} />
-              ))}
-            </div>
+            <>
+              <div className="pb-6">
+                <Skeleton className="h-6 w-32" />
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, i) => (
+                  <CourseCardSkeleton key={i} />
+                ))}
+              </div>
+            </>
           ) : !courses || courses.length === 0 ? (
             <EmptyState
               icon={BookOpen}
@@ -163,11 +158,60 @@ export function CourseGrid() {
               }
             />
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {courses.map((course) => (
-                <CourseCard key={course._id} course={course} />
-              ))}
-            </div>
+            <>
+              <div className="pb-6">
+                <div className="leading-none font-semibold">
+                  Courses ({totalCourses})
+                </div>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {courses.map((course) => (
+                  <CourseCard key={course._id} course={course} />
+                ))}
+              </div>
+
+              {courses.length > 0 && totalPages > 1 && (
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => onPaginationChange(filters.page! - 1)}
+                        aria-disabled={filters.page === 1}
+                        className={cn(
+                          "cursor-pointer",
+                          filters.page === 1 && "pointer-events-none opacity-50"
+                        )}
+                      />
+                    </PaginationItem>
+
+                    {getPaginationRange(filters.page!, totalPages).map(
+                      (page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            isActive={page === filters.page}
+                            onClick={() => onPaginationChange(page)}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    )}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => onPaginationChange(filters.page! + 1)}
+                        aria-disabled={filters.page! >= totalPages}
+                        className={cn(
+                          "cursor-pointer",
+                          filters.page! >= totalPages &&
+                            "pointer-events-none opacity-50"
+                        )}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
           )}
         </div>
       </div>

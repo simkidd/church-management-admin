@@ -5,7 +5,7 @@ export interface ICourse {
   title: string;
   description: string;
   instructor?: IUser;
-  lessons?: string[];
+  lessons?: ILesson[];
   createdAt?: string | Date;
   updatedAt?: string | Date;
   thumbnail?: {
@@ -14,7 +14,7 @@ export interface ICourse {
   };
   isPublished: boolean;
   enrolledStudents: IUser[];
-  duration: number;
+  duration: string;
 }
 
 export interface ILesson {
@@ -29,22 +29,6 @@ export interface ILesson {
   order: number;
 }
 
-export interface CreateCourseData {
-  title: string;
-  description: string;
-  instructor: string;
-  isPublished: boolean;
-  thumbnail?: File | string;
-}
-
-export interface UpdateCourseData {
-  title?: string;
-  description?: string;
-  category?: string;
-  duration?: string;
-  instructor?: string;
-  image?: File | string;
-}
 export interface ListCourseParams {
   page?: number;
   limit?: number;
