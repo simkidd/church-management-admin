@@ -34,7 +34,7 @@ export const CourseDetailsOverviewTab = ({ course }: OverviewTabProps) => {
             <div>
               <span className="font-medium">Total Duration:</span>
               <span className="text-muted-foreground ml-2">
-                {formatDuration(course.duration)}
+                {/* {formatDuration(course.duration)} */}
               </span>
             </div>
             <div>
