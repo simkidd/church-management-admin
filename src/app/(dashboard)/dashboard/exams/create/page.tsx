@@ -7,11 +7,11 @@ export default function CreateExamPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/dashboard/exams">
-          <Button variant="outline" size="icon">
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/dashboard/exams">
             <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Create Exam</h1>
           <p className="text-muted-foreground">
