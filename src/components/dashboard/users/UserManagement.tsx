@@ -59,6 +59,7 @@ import { getPaginationRange } from "@/components/shared/DataTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { debounce } from "@/utils/helpers/debounce";
+import { format } from "date-fns";
 
 const ActionComp = ({ user }: { user: IUser }) => {
   return (
@@ -69,16 +70,16 @@ const ActionComp = ({ user }: { user: IUser }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <Link href={`/dashboard/users/${user.id}`}>
-          <DropdownMenuItem>
-            <Edit className="h-4 w-4 mr-2" />
-            Edit
-          </DropdownMenuItem>
-        </Link>
-        <DropdownMenuItem className="text-red-600">
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href={`/dashboard/users/${user.id}`}>
+            <Edit className="h-4 w-4" />
+            View Info
+          </Link>
         </DropdownMenuItem>
+        {/* <DropdownMenuItem variant="destructive" className="cursor-pointer">
+          <Trash2 className="h-4 w-4" />
+          Delete
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -299,7 +300,7 @@ export function UserManagement() {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {user.lastLogin
-                          ? new Date(user.lastLogin).toLocaleDateString()
+                          ? format(new Date(user.lastLogin), "MMM dd, yyyy")
                           : "Never"}
                       </TableCell>
                       <TableCell>
