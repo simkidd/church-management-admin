@@ -37,10 +37,12 @@ import { toast } from "sonner";
 import examsApi from "@/lib/api/exam.api";
 import { CreateExamData } from "@/interfaces/exam.interface";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import api from "@/lib/axios";
 import { ICourse } from "@/interfaces/course.interface";
 import { useEffect } from "react";
+import courseApi from "@/lib/api/course.api";
+import Link from "next/link";
 
 const questionSchema = z
   .object({
@@ -126,9 +128,23 @@ const examSchema = z.object({
 
 type ExamFormData = z.infer<typeof examSchema>;
 
-export default function ExamForm() {
+interface ExamFormProps {
+  courseId?: string;
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
+export default function ExamForm({ courseId, searchParams }: ExamFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const resolvedCourseId = courseId || (searchParams?.courseId as string);
+
+  // Fetch the specific course data if courseId is provided
+  const { data: courseData, isLoading: isLoadingCourse } = useQuery({
+    queryKey: ["course", resolvedCourseId],
+    queryFn: () => courseApi.getCourseById(resolvedCourseId),
+    enabled: !!resolvedCourseId,
+  });
 
   // Fetch courses for dropdown
   const { data: coursesData, isLoading: isLoadingCourses } = useQuery({
@@ -140,12 +156,13 @@ export default function ExamForm() {
   });
 
   const courses = coursesData?.data.data || [];
+  const currentCourse = courseData?.data;
 
   const form = useForm<ExamFormData>({
     resolver: zodResolver(examSchema),
     defaultValues: {
       title: "",
-      course: "",
+      course: resolvedCourseId || "",
       duration: 60,
       passingScore: 70,
       isPublished: false,
@@ -179,7 +196,13 @@ export default function ExamForm() {
         description: `${exam.title} has been created.`,
       });
       queryClient.invalidateQueries({ queryKey: ["allExams"] });
-      router.push("/dashboard/exams");
+      queryClient.invalidateQueries({ queryKey: ["exam", resolvedCourseId] });
+
+      if (resolvedCourseId) {
+        router.push(`/dashboard/courses/${resolvedCourseId}?tab=exams`);
+      } else {
+        router.push("/dashboard/exams");
+      }
     },
     onError: (error: AxiosError<ApiErrorResponse>) => {
       const errorMessage =
@@ -219,189 +242,215 @@ export default function ExamForm() {
   };
 
   const isLoading = createExamMutation.isPending;
+  const isCourseLocked = !!resolvedCourseId;
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-6 max-w-4xl mx-auto"
-      >
-        {/* Exam Basic Information */}
-        <div className="space-y-4 p-6 border rounded-lg bg-card">
-          <h2 className="text-xl font-semibold">Exam Information</h2>
-
-          <FormField
-            control={control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Exam Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="Final JavaScript Exam" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={control}
-              name="course"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Course</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a course" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {courses.map((course: ICourse) => (
-                        <SelectItem key={course._id} value={course._id}>
-                          {course.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="duration"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Duration (minutes)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(parseInt(e.target.value) || 0)
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={control}
-              name="passingScore"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Passing Score (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(parseInt(e.target.value) || 0)
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="isPublished"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Publish exam immediately</FormLabel>
-                    <FormDescription>
-                      The exam will be visible to students if published.
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" asChild>
+          <Link
+            href={
+              resolvedCourseId
+                ? `/dashboard/courses/${resolvedCourseId}?tab=exams`
+                : "/dashboard/exams"
+            }
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Create New Exam</h1>
+          <p className="text-muted-foreground">
+            {currentCourse
+              ? `Creating exam for: ${currentCourse.title}`
+              : "Create a new exam for your course"}
+          </p>
         </div>
+      </div>
 
-        {/* Questions Section */}
-        <div className="space-y-4 p-6 border rounded-lg bg-card">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Questions</h2>
+      <Form {...form}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6 max-w-4xl mx-auto"
+        >
+          {/* Exam Basic Information */}
+          <div className="space-y-4 p-6 border rounded-lg bg-card">
+            <h2 className="text-xl font-semibold">Exam Information</h2>
+
+            <FormField
+              control={control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Exam Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Final JavaScript Exam" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={control}
+                name="course"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Course</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isCourseLocked}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a course" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {courses.map((course: ICourse) => (
+                          <SelectItem key={course._id} value={course._id}>
+                            {course.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="duration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duration (minutes)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={control}
+                name="passingScore"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Passing Score (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="isPublished"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Publish exam immediately</FormLabel>
+                      <FormDescription>
+                        The exam will be visible to students if published.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
 
-          {fields.map((field, index) => (
-            <QuestionField
-              key={field.id}
-              control={control}
-              watch={watch}
-              index={index}
-              onRemove={() => removeQuestion(index)}
-              disabled={isLoading}
-            />
-          ))}
+          {/* Questions Section */}
+          <div className="space-y-4 p-6 border rounded-lg bg-card">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Questions</h2>
+            </div>
 
-          {formState.errors.questions && (
-            <FormMessage>{formState.errors.questions.message}</FormMessage>
-          )}
+            {fields.map((field, index) => (
+              <QuestionField
+                key={field.id}
+                control={control}
+                watch={watch}
+                index={index}
+                onRemove={() => removeQuestion(index)}
+                disabled={isLoading}
+              />
+            ))}
 
-          <div className="w-full">
+            {formState.errors.questions && (
+              <FormMessage>{formState.errors.questions.message}</FormMessage>
+            )}
+
+            <div className="w-full">
+              <Button
+                type="button"
+                onClick={addQuestion}
+                variant="outline"
+                size="sm"
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Question
+              </Button>
+            </div>
+          </div>
+
+          {/* Form Actions */}
+          <div className="flex gap-4 justify-end pt-6">
             <Button
               type="button"
-              onClick={addQuestion}
               variant="outline"
-              size="sm"
-              className="w-full"
+              onClick={() => router.push("/dashboard/exams")}
+              disabled={isLoading}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Question
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading || isLoadingCourses}
+              className="min-w-32"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Exam"
+              )}
             </Button>
           </div>
-        </div>
-
-        {/* Form Actions */}
-        <div className="flex gap-4 justify-end pt-6">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push("/dashboard/exams")}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={isLoading || isLoadingCourses}
-            className="min-w-32"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              "Create Exam"
-            )}
-          </Button>
-        </div>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </div>
   );
 }
 

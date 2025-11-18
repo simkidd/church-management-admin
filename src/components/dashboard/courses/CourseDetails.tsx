@@ -28,7 +28,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CourseDetailsAnalyticsTab } from "./CourseDetailAnalyticsTab";
 import { CourseDetailsOverviewTab } from "./CourseDetailsOverviewTab";
 import { CourseDetailsSkeleton } from "./CourseDetailsSkeleton";
@@ -49,10 +49,29 @@ import {
 } from "@/components/ui/alert-dialog";
 import CourseForm from "./CourseForm";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import ExamsTab from "./ExamsTab";
 
 const CourseDetails = ({ courseId }: { courseId: string }) => {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("overview");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const urlTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(urlTab || "overview");
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+
+    // Create new URL with updated tab parameter
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", value);
+
+    // Update URL without page reload
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { data, isPending, error } = useQuery<ApiResponse<ICourse>>({
@@ -130,7 +149,7 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
         <EmptyState
           icon={BookOpen}
           title="Course Not Found"
-          description="The courser you're looking for doesn't exist or you
+          description="The course you're looking for doesn't exist or you
                 don't have permission to view it."
           action={
             <Button asChild>
@@ -336,12 +355,13 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
           <div className="lg:col-span-3">
             <Tabs
               value={activeTab}
-              onValueChange={setActiveTab}
+              onValueChange={handleTabChange}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="lessons">Lessons</TabsTrigger>
+                <TabsTrigger value="exams">Exams</TabsTrigger>
                 <TabsTrigger value="students">Students</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
               </TabsList>
@@ -355,6 +375,10 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
                   lessons={course.lessons || []}
                   courseId={course._id}
                 />
+              </TabsContent>
+
+              <TabsContent value="exams" className="mt-6">
+                <ExamsTab courseId={course._id} />
               </TabsContent>
 
               <TabsContent value="students" className="mt-6">

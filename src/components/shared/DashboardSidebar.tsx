@@ -124,12 +124,6 @@ const navGroups: INavGroup[] = [
         roles: ["super-admin", "admin", "instructor"],
         icon: TrendingUp,
       },
-      {
-        title: "Results",
-        url: "/dashboard/exams/results",
-        roles: ["super-admin", "admin", "instructor"],
-        icon: Award,
-      },
     ],
   },
   {
@@ -231,12 +225,7 @@ const commonNav: ISidebarMenu[] = [
 export function DashboardSidebar() {
   const pathname = usePathname();
   const { user, hasHydrated } = useAuthStore();
-  const { mutate: logout, isPending } = useLogout();
   const { setOpenMobile } = useSidebar();
-
-  const getInitials = (firstName?: string, lastName?: string) => {
-    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
-  };
 
   const isItemActive = (itemUrl: string) => {
     if (itemUrl === "/dashboard") {
@@ -270,22 +259,6 @@ export function DashboardSidebar() {
         ...item,
         items: item.items ? filterNestedItems(item.items) : undefined,
       }));
-  };
-
-  // Get user role display name
-  const getRoleDisplayName = (): string => {
-    switch (userRole) {
-      case "super-admin":
-        return "Super Admin";
-      case "admin":
-        return "Administrator";
-      case "pastor":
-        return "Pastor";
-      case "instructor":
-        return "Instructor";
-      default:
-        return "Member";
-    }
   };
 
   if (!hasHydrated) {
