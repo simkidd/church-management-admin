@@ -24,9 +24,10 @@ import { hasDashboardAccess } from "@/utils/helpers/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Loader2, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -47,6 +48,7 @@ const LoginForm = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
+  const [showPassword, setShowPassword] = useState(false);
 
   const redirectUrl = searchParams.get("redirect");
 
@@ -149,7 +151,7 @@ const LoginForm = () => {
                   <div className="flex items-center justify-between">
                     <FieldLabel htmlFor="login-password">Password</FieldLabel>
                     <Link
-                      href="/forgot-password"
+                      href="/auth/forgot-password"
                       className="text-sm text-primary hover:underline"
                     >
                       Forgot password?
@@ -160,13 +162,25 @@ const LoginForm = () => {
                     <Input
                       {...field}
                       id="login-password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
-                      className="pl-10"
+                      className="px-10"
                       aria-invalid={fieldState.invalid}
                       disabled={isLoading}
                       autoComplete="current-password"
                     />
+
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground cursor-pointer"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />

@@ -156,11 +156,11 @@ export function UserForm({ initialData, isEditing = false }: UserFormProps) {
 
   const handleFormSubmit = (data: FormData) => {
     console.log("form data>>>", data);
-    // if (isEditing) {
-    //   updateUserMutation.mutate(data);
-    // } else {
+    if (isEditing) {
+      updateUserMutation.mutate(data);
+    } else {
       createUserMutation.mutate(data);
-    // }
+    }
   };
 
   const isLoading =
@@ -481,7 +481,7 @@ export function UserForm({ initialData, isEditing = false }: UserFormProps) {
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 {isEditing ? "Updating..." : "Creating..."}
               </>
             ) : isEditing ? (

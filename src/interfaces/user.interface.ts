@@ -1,4 +1,5 @@
 export interface IUser {
+  _id: string;
   id: string;
   firstName: string;
   lastName: string;
@@ -41,13 +42,40 @@ export interface CreateUserData {
   roles: string[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface UpdateUserData extends Partial<CreateUserData> {}
+export type UpdateUserData = Partial<CreateUserData>;
 
 export interface ListUsersParams {
-  page?: number;
+  page: number;
   limit?: number;
   search?: string;
   role?: string;
   status?: string;
+}
+
+export interface RoleStats {
+  total: number;
+  roles: {
+    superAdmin: number;
+    admin: number;
+    instructor: number;
+    pastor: number;
+    member: number;
+  };
+  status: {
+    active: number;
+    inactive: number;
+    suspended: number;
+    banned: number;
+  };
+  verification: {
+    verified: number;
+    unverified: number;
+  };
+  percentages: {
+    superAdmin: string;
+    admin: string;
+    instructor: string;
+    pastor: string;
+    member: string;
+  };
 }

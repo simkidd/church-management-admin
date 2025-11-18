@@ -1,9 +1,13 @@
-import { ApiResponse } from "@/interfaces/response.interface";
+import {
+  ApiResponse,
+  PaginatedResponse,
+} from "@/interfaces/response.interface";
 import api from "../axios";
 import {
   CreateUserData,
   IUser,
   ListUsersParams,
+  RoleStats,
   UpdateUserData,
 } from "@/interfaces/user.interface";
 
@@ -11,9 +15,7 @@ export const usersApi = {
   // Get all users
   getUsers: async (
     params?: ListUsersParams
-  ): Promise<
-    ApiResponse<{ users: IUser[]; total: number; page: number; limit: number }>
-  > => {
+  ): Promise<ApiResponse<PaginatedResponse<IUser>>> => {
     const response = await api.get("/users", { params });
     return response.data;
   },
@@ -90,6 +92,23 @@ export const usersApi = {
     }>
   > => {
     const response = await api.delete(`/users/${id}/avatar`);
+    return response.data;
+  },
+
+  // Get roles stats
+  getRolesStats: async (): Promise<ApiResponse<RoleStats>> => {
+    const response = await api.get("/users/stats/roles");
+    return response.data;
+  },
+
+  /**
+   * Get instructors list (for dropdowns)
+   */
+  getInstructorsList: async (params?: {
+    search?: string;
+    status?: string;
+  }): Promise<ApiResponse<IUser[]>> => {
+    const response = await api.get("/users/instructors/list", { params });
     return response.data;
   },
 };

@@ -30,21 +30,20 @@ export function hasDashboardAccess(user: IUser | null): boolean {
 /**
  * Gets all roles that a user has (can have multiple roles)
  */
-export function getUserRoles(user: IUser | null): string[] {
-  if (!user) return ["Member"];
-
+export function getUserRoles(user: IUser): string[] {
   const roles: string[] = [];
 
-  if (user.isSuperAdmin) roles.push("Super Admin");
-  if (user.isAdmin) roles.push("Admin");
-  if (user.isPastor) roles.push("Pastor");
-  if (user.isInstructor) roles.push("Instructor");
+  if (user.isSuperAdmin) roles.push("super-admin");
+  if (user.isAdmin) roles.push("admin");
+  if (user.isPastor) roles.push("pastor");
+  if (user.isInstructor) roles.push("instructor");
 
-  // If no specific roles, they're a member
-  if (roles.length === 0) roles.push("Member");
+  // Default role if no other roles
+  if (roles.length === 0) roles.push("member");
 
   return roles;
 }
+
 
 /**
  * Checks if user has specific role access

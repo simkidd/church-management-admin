@@ -1,9 +1,13 @@
-import React from 'react'
+import ExamForm from "@/components/dashboard/exams/ExamForm";
 
-const page = () => {
-  return (
-    <div>page</div>
-  )
-}
+const CreateExamPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) => {
+  const searchParamsObj = await searchParams;
 
-export default page
+  return <ExamForm searchParams={searchParamsObj} />;
+};
+
+export default CreateExamPage;

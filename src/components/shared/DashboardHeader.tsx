@@ -1,26 +1,9 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useLogout } from "@/hooks/use-logout";
 import { useAuthStore } from "@/stores/auth.store";
-import {
-  Bell,
-  Calendar,
-  MoonIcon,
-  Settings,
-  SunIcon,
-  User
-} from "lucide-react";
+import { Bell, Calendar, MoonIcon, SunIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { WiSunrise } from "react-icons/wi";
 import { SidebarTrigger } from "../ui/sidebar";
@@ -28,7 +11,6 @@ import { ThemeToggler } from "./ThemeToggler";
 
 export function DashboardHeader() {
   const { user } = useAuthStore();
-  const { mutate: logout } = useLogout();
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Update time every minute (instead of every second for better performance)
@@ -77,33 +59,6 @@ export function DashboardHeader() {
       };
     }, [currentTime]);
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
-  };
-
-  const getUserRole = (): string => {
-    if (!user) return "";
-    
-    if (user.isSuperAdmin) return "super-admin";
-    if (user.isAdmin) return "admin";
-    if (user.isPastor) return "pastor";
-    if (user.isInstructor) return "instructor";
-    
-    return "member";
-  };
-
-  const userRole = getUserRole();
-
-   const getRoleDisplayName = (): string => {
-    switch (userRole) {
-      case "super-admin": return "Super Admin";
-      case "admin": return "Administrator";
-      case "pastor": return "Pastor";
-      case "instructor": return "Instructor";
-      default: return "Member";
-    }
-  };
-
   return (
     <header className="border-b bg-background">
       <div className="w-full px-4 flex h-16 items-center justify-between gap-4">
@@ -133,62 +88,16 @@ export function DashboardHeader() {
           <div className="flex items-center gap-2">
             <ThemeToggler />
 
-            <Button variant="ghost" size="icon" className="relative rounded-full cursor-pointer">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative rounded-full cursor-pointer"
+            >
               <Bell className="h-5 w-5 text-muted-foreground" />
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                 3
               </span>
             </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-8 w-8 rounded-full cursor-pointer"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src={user?.avatar?.url}
-                      alt={user?.firstName}
-                    />
-                    <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
-                      {getInitials(user?.firstName || "", user?.lastName || "")}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {user?.firstName} {user?.lastName}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email}
-                    </p>
-                    <Badge
-                      variant="secondary"
-                      className="mt-1 capitalize w-fit"
-                    >
-                      {getRoleDisplayName()}
-                    </Badge>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => logout()}>
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
