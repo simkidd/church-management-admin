@@ -124,12 +124,6 @@ const navGroups: INavGroup[] = [
         roles: ["super-admin", "admin", "instructor"],
         icon: TrendingUp,
       },
-      {
-        title: "Results",
-        url: "/dashboard/exams/results",
-        roles: ["super-admin", "admin", "instructor"],
-        icon: Award,
-      },
     ],
   },
   {

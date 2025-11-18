@@ -13,6 +13,7 @@ import {
   ManualGradeData,
   ListExamsParams,
   ListExamSubmissonsParams,
+  ExamsByCourseResponse,
 } from "@/interfaces/exam.interface";
 import { QuestionFormData } from "@/components/dashboard/exams/AddQuestionForm";
 
@@ -151,6 +152,18 @@ export const examsApi = {
     const response = await api.delete(
       `/exams/${examId}/questions/${questionId}`
     );
+    return response.data;
+  },
+
+  getExamsByCourse: async (
+    courseId: string,
+    params?: {
+      page?: number;
+      limit?: number;
+      isPublished?: boolean;
+    }
+  ): Promise<ApiResponse<ExamsByCourseResponse>> => {
+    const response = await api.get(`/exams/course/${courseId}`, { params });
     return response.data;
   },
 };

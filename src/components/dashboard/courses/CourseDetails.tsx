@@ -50,6 +50,7 @@ import {
 import CourseForm from "./CourseForm";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
+import ExamsTab from "./ExamsTab";
 
 const CourseDetails = ({ courseId }: { courseId: string }) => {
   const queryClient = useQueryClient();
@@ -148,7 +149,7 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
         <EmptyState
           icon={BookOpen}
           title="Course Not Found"
-          description="The courser you're looking for doesn't exist or you
+          description="The course you're looking for doesn't exist or you
                 don't have permission to view it."
           action={
             <Button asChild>
@@ -357,9 +358,10 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
               onValueChange={handleTabChange}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="lessons">Lessons</TabsTrigger>
+                <TabsTrigger value="exams">Exams</TabsTrigger>
                 <TabsTrigger value="students">Students</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
               </TabsList>
@@ -373,6 +375,10 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
                   lessons={course.lessons || []}
                   courseId={course._id}
                 />
+              </TabsContent>
+
+              <TabsContent value="exams" className="mt-6">
+                <ExamsTab courseId={course._id} />
               </TabsContent>
 
               <TabsContent value="students" className="mt-6">

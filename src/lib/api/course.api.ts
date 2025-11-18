@@ -4,6 +4,7 @@ import {
   PaginatedResponse,
 } from "@/interfaces/response.interface";
 import api from "../axios";
+import { IExam } from "@/interfaces/exam.interface";
 
 export const courseApi = {
   //  GET all courses
