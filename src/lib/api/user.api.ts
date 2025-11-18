@@ -21,13 +21,7 @@ export const usersApi = {
   },
 
   // Get user by ID
-  getUserById: async (
-    id: string
-  ): Promise<
-    ApiResponse<{
-      user: IUser;
-    }>
-  > => {
+  getUserById: async (id: string): Promise<ApiResponse<IUser>> => {
     const response = await api.get(`/users/${id}`);
     return response.data;
   },
