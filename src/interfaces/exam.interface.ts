@@ -119,3 +119,18 @@ export interface ListExamSubmissonsParams {
   limit?: number;
   graded?: boolean;
 }
+
+export interface ExamsByCourseResponse {
+  data: IExam[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+  course: {
+    _id: string;
+    title: string;
+    instructor: string;
+  };
+}

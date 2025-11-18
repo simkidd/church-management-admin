@@ -22,9 +22,9 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationPrevious,
   PaginationLink,
   PaginationNext,
+  PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -39,16 +39,15 @@ import useExams from "@/hooks/useExams";
 import { IExam, ListExamsParams } from "@/interfaces/exam.interface";
 import { cn } from "@/lib/utils";
 import { debounce } from "@/utils/helpers/debounce";
+import { formatDuration } from "@/utils/helpers/time";
 import {
   Clock,
-  Edit,
   Eye,
   FilePenLine,
   FileText,
   MoreHorizontal,
   RefreshCw,
-  Search,
-  Users,
+  Search
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
@@ -265,7 +264,7 @@ export function ExamList() {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4 text-muted-foreground" />
-                        {exam.duration} min
+                        {formatDuration(exam.duration)}
                       </div>
                     </TableCell>
                     <TableCell>{exam.questionCount || 0}</TableCell>
