@@ -60,6 +60,7 @@ import {
 import { debounce } from "@/utils/helpers/debounce";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
 
 export const rolePermissions = {
   "super-admin": {
@@ -347,7 +348,9 @@ export function RoleManagement() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {new Date(user.lastLogin).toLocaleDateString()}
+                          {user.lastLogin
+                            ? format(new Date(user.lastLogin), "MMM dd, yyyy")
+                            : "Never"}
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
