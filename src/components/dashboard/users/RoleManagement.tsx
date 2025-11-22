@@ -192,9 +192,7 @@ export function RoleManagement() {
   };
 
   // Handle save roles
-  const handleSaveRoles = (updatedRoles: string[]) => {
-    // In real app, this would call an API to update user roles
-    console.log("Updating roles for user:", selectedUser?.id, updatedRoles);
+  const handleSaveRoles = () => {
     setIsEditDialogOpen(false);
     setSelectedUser(null);
   };

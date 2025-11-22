@@ -105,6 +105,17 @@ export const usersApi = {
     const response = await api.get("/users/instructors/list", { params });
     return response.data;
   },
+
+  /**
+   * Update user roles
+   */
+  updateUserRoles: async (
+    id: string,
+    data: { roles: string[] }
+  ): Promise<ApiResponse<IUser>> => {
+    const response = await api.patch(`/users/${id}/roles`, data);
+    return response.data;
+  },
 };
 
 export default usersApi;

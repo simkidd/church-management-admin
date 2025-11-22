@@ -20,6 +20,7 @@ export interface IUser {
   isSuperAdmin: boolean;
   isInstructor: boolean;
   isPastor: boolean;
+  primaryRole: string
 }
 
 export type Gender = "male" | "female";
