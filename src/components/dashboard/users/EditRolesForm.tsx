@@ -6,6 +6,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { IUser } from "@/interfaces/user.interface";
 import React, { useState } from "react";
 import { rolePermissions } from "./RoleManagement";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import usersApi from "@/lib/api/user.api";
+import { Toaster } from "@/components/ui/sonner";
+import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/interfaces/response.interface";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
+const editableRoles = ["super-admin", "admin", "pastor", "instructor"];
 
 const EditRolesForm = ({
   user,
@@ -13,10 +22,10 @@ const EditRolesForm = ({
   onCancel,
 }: {
   user: IUser;
-  onSave: (roles: string[]) => void;
+  onSave: () => void;
   onCancel: () => void;
 }) => {
-  const editableRoles = ["super-admin", "admin", "pastor", "instructor"];
+  const queryClient = useQueryClient();
 
   const [selectedRoles, setSelectedRoles] = useState<string[]>(() => {
     const roles: string[] = [];
@@ -27,6 +36,24 @@ const EditRolesForm = ({
     return roles;
   });
 
+  const updateRoleMutation = useMutation({
+    mutationFn: (roles: string[]) =>
+      usersApi.updateUserRoles(user.id, { roles }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      
+      toast.success("Roles updated successfully", {
+        description: `User roles have been updated for ${user.firstName} ${user.lastName}`,
+      });
+      onSave?.();
+    },
+    onError: (error: AxiosError<ApiErrorResponse>) => {
+      toast.error("Failed to update roles", {
+        description: error.response?.data?.message || "An error occurred",
+      });
+    },
+  });
+
   const handleRoleChange = (role: string, checked: boolean) => {
     let newRoles: string[];
     if (checked) {
@@ -35,14 +62,26 @@ const EditRolesForm = ({
       newRoles = selectedRoles.filter((r) => r !== role);
     }
 
-    // Ensure at least one role is selected
-    if (newRoles.length === 0) return;
-
     setSelectedRoles(newRoles);
   };
 
   const handleSubmit = () => {
-    onSave(selectedRoles);
+    updateRoleMutation.mutate(selectedRoles);
+  };
+
+  const hasChanges = () => {
+    if (!user) return false;
+
+    const currentRoles = [];
+    if (user.isSuperAdmin) currentRoles.push("super-admin");
+    if (user.isAdmin) currentRoles.push("admin");
+    if (user.isPastor) currentRoles.push("pastor");
+    if (user.isInstructor) currentRoles.push("instructor");
+
+    return (
+      JSON.stringify(currentRoles.sort()) !==
+      JSON.stringify(selectedRoles.sort())
+    );
   };
 
   return (
@@ -61,6 +100,7 @@ const EditRolesForm = ({
                   onCheckedChange={(checked) =>
                     handleRoleChange(key, Boolean(checked))
                   }
+                  disabled={updateRoleMutation.isPending}
                 />
                 <div>
                   <div className="font-medium">{role.name}</div>
@@ -78,10 +118,22 @@ const EditRolesForm = ({
       </div>
 
       <div className="flex gap-3 justify-end pt-4">
-        <Button variant="outline" onClick={onCancel}>
+        <Button
+          variant="outline"
+          onClick={onCancel}
+          disabled={updateRoleMutation.isPending}
+        >
           Cancel
         </Button>
-        <Button onClick={handleSubmit}>Save Changes</Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={!hasChanges() || updateRoleMutation.isPending}
+        >
+          {updateRoleMutation.isPending && (
+            <Loader2 className=" h-4 w-4 animate-spin" />
+          )}
+          Save Changes
+        </Button>
       </div>
     </div>
   );

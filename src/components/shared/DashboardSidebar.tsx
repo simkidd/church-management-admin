@@ -38,6 +38,8 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import DashboardNavUser from "./DashboardNavUser";
+import { config } from "@/utils/config";
+import Logo from "./Logo";
 
 interface ISidebarMenu {
   title: string;
@@ -266,9 +268,9 @@ export function DashboardSidebar() {
       <Sidebar collapsible="icon" className="border-r">
         <SidebarHeader className="px-2 py-2 border-b min-h-16 flex items-center justify-center">
           <div className="flex items-center py-1">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <Church className="h-6 w-6 text-blue-600 mx-auto" />
-              <span className="text-lg font-semibold">ChurchCMS</span>
+            <Link href="/" className="flex items-center gap-2 font-medium">
+              <Logo className="h-8" />
+              {config.SITE_NAME}
             </Link>
           </div>
         </SidebarHeader>
@@ -315,7 +317,7 @@ export function DashboardSidebar() {
                 "hidden md:block"
               )}
             >
-              <Church className="h-6 w-6 text-blue-600 mx-auto" />
+              <Logo className="h-8" />
             </div>
             <div
               className={cn(
@@ -324,7 +326,10 @@ export function DashboardSidebar() {
                 "group-data-[state=expanded]:block"
               )}
             >
-              <span className="text-lg font-semibold">ChurchCMS</span>
+              <div className="flex items-center gap-2 font-medium text-nowrap">
+                <Logo className="h-8" />
+                {config.SITE_NAME}
+              </div>
             </div>
           </Link>
         </div>
