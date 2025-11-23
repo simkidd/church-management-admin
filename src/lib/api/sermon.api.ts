@@ -4,6 +4,7 @@ import {
 } from "@/interfaces/response.interface";
 import api from "../axios";
 import { ISermon, ListSermonsParams } from "@/interfaces/sermon.interface";
+import { AxiosProgressEvent } from "axios";
 
 export const sermonsApi = {
   // Get all sermons with filters
@@ -22,10 +23,12 @@ export const sermonsApi = {
 
   // Create sermon
   createSermon: async (
-    data: FormData
+    data: FormData,
+    onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined
   ): Promise<ApiResponse<{ sermon: ISermon }>> => {
     const response = await api.post("/sermons/create", data, {
       headers: { "Content-Type": "multipart/form-data" },
+      onUploadProgress,
     });
     return response.data;
   },
@@ -33,10 +36,12 @@ export const sermonsApi = {
   // Update sermon
   updateSermon: async (
     id: string,
-    data: FormData
+    data: FormData,
+    onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined
   ): Promise<ApiResponse<{ sermon: ISermon }>> => {
     const response = await api.put(`/sermons/${id}/update`, data, {
       headers: { "Content-Type": "multipart/form-data" },
+      onUploadProgress
     });
     return response.data;
   },

@@ -77,6 +77,7 @@ import { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
+import Image from "next/image";
 
 const ActionComp = ({ sermon }: { sermon: ISermon }) => {
   const queryClient = useQueryClient();
@@ -92,7 +93,7 @@ const ActionComp = ({ sermon }: { sermon: ISermon }) => {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => sermonsApi.deleteSermon(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sermons"] });
+      queryClient.invalidateQueries({ queryKey: ["allSermons"] });
       toast.success("Success", {
         description: "Sermon deleted successfully",
       });
@@ -418,10 +419,12 @@ export function SermonList() {
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           {sermon.thumbnail?.url && (
-                            <img
+                            <Image
                               src={sermon.thumbnail.url}
                               alt={sermon.title}
                               className="w-10 h-10 rounded object-cover"
+                              width={200}
+                              height={200}
                             />
                           )}
                           <div>
