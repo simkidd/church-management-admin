@@ -167,7 +167,7 @@ export function UserManagement() {
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <Select
                 value={filters.role || "all"}
                 onValueChange={handleRoleChange}

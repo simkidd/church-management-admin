@@ -107,6 +107,17 @@ export const usersApi = {
   },
 
   /**
+   * Get instructors list (for dropdowns)
+   */
+  getPastorsList: async (params?: {
+    search?: string;
+    status?: string;
+  }): Promise<ApiResponse<IUser[]>> => {
+    const response = await api.get("/users/pastors/list", { params });
+    return response.data;
+  },
+
+  /**
    * Update user roles
    */
   updateUserRoles: async (

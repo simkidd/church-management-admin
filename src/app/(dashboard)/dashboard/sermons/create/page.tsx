@@ -1,9 +1,12 @@
+import { SermonForm } from '@/components/dashboard/sermons/SermonForm'
 import React from 'react'
 
-const page = () => {
+const CreateSermonPage = () => {
   return (
-    <div>page</div>
+    <div>
+      <SermonForm />
+    </div>
   )
 }
 
-export default page
+export default CreateSermonPage
