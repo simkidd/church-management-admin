@@ -35,7 +35,7 @@ import { ISermon } from "@/interfaces/sermon.interface";
 import { sermonsApi } from "@/lib/api/sermon.api";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { format } from "date-fns";
 import {
@@ -87,6 +87,8 @@ interface UploadProgress {
 
 export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState("");
@@ -124,6 +126,7 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
       toast.success("Success", {
         description: data.message || "Sermon created successfully",
       });
+      queryClient.invalidateQueries({ queryKey: ["allSermons"] });
       router.push("/dashboard/sermons");
     },
     onError: (error: AxiosError<ApiErrorResponse>) => {
@@ -158,7 +161,10 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
       toast.success("Success", {
         description: data.message || "Sermon updated successfully",
       });
-      router.push("/dashboard/sermons");
+      queryClient.invalidateQueries({ queryKey: ["allSermons"] });
+      queryClient.invalidateQueries({ queryKey: ["sermon", sermon?._id] });
+
+      router.push(`/dashboard/sermons/${sermon?._id}`);
     },
     onError: (error: AxiosError<ApiErrorResponse>) => {
       toast.error("Error", {
@@ -201,6 +207,23 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
       });
     }
   }, [sermon, isEdit, form]);
+
+  useEffect(() => {
+    if (sermon && isEdit) {
+      const timer = setTimeout(() => {
+        setTags(sermon.tags || []);
+
+        if (sermon.video?.url) {
+          setVideoPreview(sermon.video.url);
+        }
+        if (sermon.thumbnail?.url) {
+          setThumbnailPreview(sermon.thumbnail.url);
+        }
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Video dropzone configuration
   const onVideoDrop = useCallback((acceptedFiles: File[]) => {
@@ -302,7 +325,7 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
   };
 
   const onSubmit = async (values: SermonFormValues) => {
-    if (!videoFile) {
+    if (!videoFile && !isEdit && !sermon?.video?.url) {
       toast.error("Error", {
         description: "Video file is required",
       });
@@ -327,7 +350,8 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
     formData.append("tags", tags.join(","));
 
     // Append files
-    formData.append("video", videoFile);
+    formData.append("video", videoFile!);
+
     if (thumbnailFile) {
       formData.append("thumbnail", thumbnailFile);
     }
@@ -362,7 +386,7 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 h-fit">
               <CardContent className="space-y-6">
                 {/* Basic Information */}
                 <div className="space-y-4">
@@ -738,9 +762,7 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
                   {isUploading && (
                     <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
                       <h4 className="font-medium text-sm">Upload Progress</h4>
-                      <Progress
-                        value={uploadProgress.total}
-                      />
+                      <Progress value={uploadProgress.total} />
                       <div className="text-xs text-muted-foreground text-center">
                         {uploadProgress.total < 100
                           ? "Uploading files, please wait..."

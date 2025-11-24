@@ -138,12 +138,12 @@ const navGroups: INavGroup[] = [
         roles: ["super-admin", "admin", "pastor"],
         icon: Mic,
       },
-      {
-        title: "Popular Sermons",
-        url: "/dashboard/sermons/popular",
-        roles: ["super-admin", "admin", "pastor"],
-        icon: TrendingUp,
-      },
+      // {
+      //   title: "Popular Sermons",
+      //   url: "/dashboard/sermons/popular",
+      //   roles: ["super-admin", "admin", "pastor"],
+      //   icon: TrendingUp,
+      // },
       // {
       //   title: "Sermon Analytics",
       //   url: "/dashboard/sermons/analytics",

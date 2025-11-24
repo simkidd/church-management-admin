@@ -78,6 +78,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import Image from "next/image";
+import Link from "next/link";
 
 const ActionComp = ({ sermon }: { sermon: ISermon }) => {
   const queryClient = useQueryClient();
@@ -428,7 +429,11 @@ export function SermonList() {
                             />
                           )}
                           <div>
-                            <div className="font-medium">{sermon.title}</div>
+                            <div className="font-medium">
+                              <Link href={`/dashboard/sermons/${sermon._id}`}>
+                                {sermon.title}
+                              </Link>
+                            </div>
                             <div className="text-sm text-muted-foreground line-clamp-1">
                               {sermon.scripture}
                             </div>
