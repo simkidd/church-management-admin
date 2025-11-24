@@ -30,6 +30,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DeleteSermonDialog } from "./DeleteSermonDialog";
+import { useSermonView } from "@/hooks/useSermonView";
 
 interface SermonDetailProps {
   sermonId: string;
@@ -46,6 +47,8 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
     queryFn: () => sermonsApi.getSermonById(sermonId),
     enabled: !!sermonId,
   });
+
+  useSermonView(sermonId);
 
   const sermon = data?.data;
 

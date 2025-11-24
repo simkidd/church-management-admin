@@ -52,8 +52,8 @@ export const sermonsApi = {
   },
 
   // Increment view count
-  incrementView: async (id: string): Promise<{ views: number }> => {
-    const response = await api.post(`/sermons/${id}/increment-view`);
+  trackView: async (id: string): Promise<{ views: number }> => {
+    const response = await api.post(`/sermons/${id}/track-view`);
     return response.data;
   },
 
