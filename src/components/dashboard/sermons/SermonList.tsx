@@ -1,156 +1,533 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Play, Eye, Calendar, User, Download } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Search,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Trash2,
+  Play,
+  Volume2,
+  Filter,
+  X,
+  CalendarIcon,
+  Mic,
+  RefreshCw,
+} from "lucide-react";
+import { format } from "date-fns";
+import { sermonsApi } from "@/lib/api/sermon.api";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/interfaces/response.interface";
+import { ISermon, ListSermonsParams } from "@/interfaces/sermon.interface";
+import useSermons from "@/hooks/useSermons";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { cn } from "@/lib/utils";
+import { getPaginationRange } from "@/components/shared/DataTable";
+import { debounce } from "@/utils/helpers/debounce";
+import { DeleteSermonDialog } from "./DeleteSermonDialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { DateRange } from "react-day-picker";
+import { Calendar } from "@/components/ui/calendar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/shared/EmptyState";
+import Image from "next/image";
 import Link from "next/link";
 
-interface Sermon {
-  id: string;
-  title: string;
-  preacher: string;
-  date: string;
-  duration: string;
-  views: number;
-  category: string;
-  series?: string;
-  audioUrl?: string;
-  videoUrl?: string;
-  thumbnail?: string;
-}
+const ActionComp = ({ sermon }: { sermon: ISermon }) => {
+  const queryClient = useQueryClient();
 
-const mockSermons: Sermon[] = [
-  {
-    id: "1",
-    title: "The Power of Faith",
-    preacher: "Pastor John",
-    date: "2024-01-14",
-    duration: "45:30",
-    views: 156,
-    category: "Teaching",
-    series: "Faith Series",
-  },
-  {
-    id: "2",
-    title: "Love Your Neighbor",
-    preacher: "Pastor Sarah",
-    date: "2024-01-07",
-    duration: "38:15",
-    views: 89,
-    category: "Relationship",
-  },
-  {
-    id: "3",
-    title: "Hope in Difficult Times",
-    preacher: "Pastor Mike",
-    date: "2023-12-31",
-    duration: "52:10",
-    views: 234,
-    category: "Encouragement",
-    series: "New Year Series",
-  },
-];
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    sermon: ISermon | null;
+  }>({
+    open: false,
+    sermon: null,
+  });
 
-export function SermonList() {
-  const [search, setSearch] = useState("");
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => sermonsApi.deleteSermon(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allSermons"] });
+      toast.success("Success", {
+        description: "Sermon deleted successfully",
+      });
+    },
+    onError: (error: AxiosError<ApiErrorResponse>) => {
+      toast.error("Error", {
+        description: error.response?.data?.message || "Failed to delete sermon",
+      });
+    },
+  });
 
-  const filteredSermons = mockSermons.filter(sermon =>
-    sermon.title.toLowerCase().includes(search.toLowerCase()) ||
-    sermon.preacher.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleDelete = (sermon: ISermon) => {
+    setDeleteDialog({ open: true, sermon });
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.sermon) {
+      deleteMutation.mutate(deleteDialog.sermon._id);
+    }
+    setDeleteDialog({ open: false, sermon: null });
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="relative w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search sermons..."
-            className="pl-8"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </div>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={() => window.open(sermon.video.url, "_blank")}
+          >
+            <Play className="h-4 w-4 mr-2" />
+            Watch
+          </DropdownMenuItem>
+          {sermon.audioUrl && (
+            <DropdownMenuItem
+              onClick={() => window.open(sermon.audioUrl!, "_blank")}
+            >
+              <Volume2 className="h-4 w-4 mr-2" />
+              Listen
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <a href={`/dashboard/sermons/${sermon._id}/edit`}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => handleDelete(sermon)}
+            className="text-red-600"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      <div className="grid gap-4">
-        {filteredSermons.map((sermon) => (
-          <Card key={sermon.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold text-lg">{sermon.title}</h3>
-                      {sermon.series && (
-                        <Badge variant="outline" className="mt-1">
-                          {sermon.series}
-                        </Badge>
-                      )}
-                    </div>
-                    <Badge variant="secondary">{sermon.category}</Badge>
-                  </div>
+      <DeleteSermonDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ open, sermon: null })}
+        onConfirm={confirmDelete}
+        sermon={deleteDialog.sermon}
+        isLoading={deleteMutation.isPending}
+      />
+    </>
+  );
+};
 
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      <span>{sermon.preacher}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(sermon.date).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Play className="h-4 w-4" />
-                      <span>{sermon.duration}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Eye className="h-4 w-4" />
-                      <span>{sermon.views} views</span>
-                    </div>
-                  </div>
-                </div>
+export function SermonList() {
+  const [filters, setFilters] = useState<ListSermonsParams>({
+    page: 1,
+  });
+  const [search, setSearch] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: filters.startDate ? new Date(filters.startDate) : undefined,
+    to: filters.endDate ? new Date(filters.endDate) : undefined,
+  });
 
-                <div className="flex gap-2 ml-4">
-                  <Link href={`/dashboard/sermons/${sermon.id}`}>
-                    <Button variant="outline" size="sm">
-                      Edit
-                    </Button>
-                  </Link>
-                  {sermon.audioUrl && (
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  )}
-                  <Button size="sm">
-                    <Play className="h-4 w-4 mr-1" />
-                    Play
+  const { sermons, isPending, totalSermons, totalPages } = useSermons(filters);
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((searchValue: string) => {
+        setFilters((prev) => ({
+          ...prev,
+          search: searchValue.trim() || undefined,
+          page: 1,
+        }));
+      }, 500), // 500ms delay
+    []
+  );
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearch(value);
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
+
+  const handleFilterChange = (newFilters: Partial<ListSermonsParams>) => {
+    setFilters((prev) => ({
+      ...prev,
+      ...newFilters,
+      page: 1, // Reset to first page when filters change
+    }));
+  };
+
+  const handleStatusChange = (value: string) => {
+    if (value === "all") {
+      handleFilterChange({ isPublished: undefined });
+    } else {
+      handleFilterChange({ isPublished: value === "true" });
+    }
+  };
+
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+
+    if (range?.from && range?.to) {
+      // Set time to start of day for from date and end of day for to date
+      const fromDate = new Date(range.from);
+      fromDate.setHours(0, 0, 0, 0);
+
+      const toDate = new Date(range.to);
+      toDate.setHours(23, 59, 59, 999);
+
+      handleFilterChange({
+        startDate: fromDate.toISOString(),
+        endDate: toDate.toISOString(),
+      });
+    } else {
+      // No date range selected or incomplete range
+      handleFilterChange({
+        startDate: undefined,
+        endDate: undefined,
+      });
+    }
+  };
+
+  const onPaginationChange = (page: number) => {
+    setFilters((prev) => ({ ...prev, page }));
+  };
+
+  const handleResetFilters = () => {
+    setSearch("");
+    setDateRange(undefined);
+    setFilters({
+      page: 1,
+      limit: 10,
+    });
+    debouncedSearch.cancel();
+  };
+
+  const hasActiveFilters = useMemo(() => {
+    const { page, limit, ...filterFields } = filters;
+    return Object.values(filterFields).some(
+      (value) => value !== undefined && value !== "" && value !== null
+    );
+  }, [filters]);
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search sermons..."
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              {/* Status Filter */}
+
+              <Select
+                value={
+                  filters.isPublished === undefined
+                    ? "all"
+                    : filters.isPublished.toString()
+                }
+                onValueChange={handleStatusChange}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="All statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="true">Published</SelectItem>
+                  <SelectItem value="false">Draft</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Date Range Picker */}
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "h-9 w-60 justify-start text-left font-normal",
+                      !dateRange && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateRange?.from ? (
+                      dateRange.to ? (
+                        <>
+                          {format(dateRange.from, "LLL dd, y")} -{" "}
+                          {format(dateRange.to, "LLL dd, y")}
+                        </>
+                      ) : (
+                        format(dateRange.from, "LLL dd, y")
+                      )
+                    ) : (
+                      <span>Pick a date range</span>
+                    )}
                   </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto overflow-hidden p-0"
+                  align="start"
+                >
+                  <Calendar
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={handleDateRangeChange}
+                    numberOfMonths={2}
+                    className="rounded-lg border shadow-sm"
+                  />
+                </PopoverContent>
+              </Popover>
 
-      {filteredSermons.length === 0 && (
-        <div className="text-center py-12 border rounded-lg">
-          <Play className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No sermons found</h3>
-          <p className="text-muted-foreground mb-4">
-            {search ? "Try adjusting your search terms" : "Start by uploading your first sermon"}
-          </p>
-          <Link href="/dashboard/sermons/create">
-            <Button>
-              Upload Sermon
-            </Button>
-          </Link>
-        </div>
-      )}
+              {/* Clear Filters Button */}
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  onClick={handleResetFilters}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Reset Filters
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {isPending ? (
+              <Skeleton className="h-6 w-32" />
+            ) : (
+              `Sermons (${totalSermons})`
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isPending ? (
+            <Table>
+              <TableBody>
+                {[...Array(5)].map((_, rowIndex) => (
+                  <TableRow key={`skeleton-${rowIndex}`}>
+                    {[...Array(7)].map((_, colIndex) => (
+                      <TableCell key={colIndex}>
+                        <Skeleton className="h-6 w-full" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : !sermons || sermons.length === 0 ? (
+            <EmptyState
+              icon={Mic}
+              title="No sermons found"
+              description="Try adjusting your filters or search terms."
+              action={
+                hasActiveFilters && (
+                  <Button variant="outline" onClick={handleResetFilters}>
+                    Reset Filters
+                  </Button>
+                )
+              }
+            />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Preacher</TableHead>
+                  <TableHead>Date Preached</TableHead>
+                  <TableHead>Views</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Tags</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sermons.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center">
+                      No sermons found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  sermons.map((sermon) => (
+                    <TableRow key={sermon._id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {sermon.thumbnail?.url && (
+                            <Image
+                              src={sermon.thumbnail.url}
+                              alt={sermon.title}
+                              className="w-10 h-10 rounded object-cover"
+                              width={200}
+                              height={200}
+                            />
+                          )}
+                          <div>
+                            <div className="font-medium">
+                              <Link href={`/dashboard/sermons/${sermon._id}`}>
+                                {sermon.title}
+                              </Link>
+                            </div>
+                            <div className="text-sm text-muted-foreground line-clamp-1">
+                              {sermon.scripture}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {sermon.preacher.firstName} {sermon.preacher.lastName}
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(sermon.datePreached), "MMM dd, yyyy")}
+                      </TableCell>
+                      <TableCell>{sermon.views.toLocaleString()}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={sermon.isPublished ? "default" : "secondary"}
+                        >
+                          {sermon.isPublished ? "Published" : "Draft"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                          {sermon.tags?.slice(0, 2).map((tag) => (
+                            <Badge
+                              key={tag}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                          {sermon.tags && sermon.tags.length > 2 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{sermon.tags.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <ActionComp sermon={sermon} />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+
+        {sermons && sermons.length > 0 && (
+          <CardFooter className="flex justify-between">
+            {/* Pagination controls */}
+            {sermons.length > 0 && totalPages > 1 && (
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => onPaginationChange(filters.page - 1)}
+                      aria-disabled={filters.page === 1}
+                      className={cn(
+                        "cursor-pointer",
+                        filters.page === 1 && "pointer-events-none opacity-50"
+                      )}
+                    />
+                  </PaginationItem>
+
+                  {getPaginationRange(filters.page, totalPages).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        isActive={page === filters.page}
+                        onClick={() => onPaginationChange(page)}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => onPaginationChange(filters.page + 1)}
+                      aria-disabled={filters.page >= totalPages}
+                      className={cn(
+                        "cursor-pointer",
+                        filters.page >= totalPages &&
+                          "pointer-events-none opacity-50"
+                      )}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </CardFooter>
+        )}
+      </Card>
     </div>
   );
 }
