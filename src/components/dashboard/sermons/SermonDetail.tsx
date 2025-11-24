@@ -5,18 +5,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ApiResponse } from "@/interfaces/response.interface";
+import { ApiErrorResponse, ApiResponse } from "@/interfaces/response.interface";
 import { ISermon } from "@/interfaces/sermon.interface";
 import { sermonsApi } from "@/lib/api/sermon.api";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { format } from "date-fns";
 import {
   ArrowLeft,
+  BookOpen,
+  BookOpenCheckIcon,
   Calendar,
   Edit,
   Eye,
   MicIcon,
   Play,
+  Trash2,
   User,
   Volume2,
 } from "lucide-react";
@@ -24,6 +28,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+import { DeleteSermonDialog } from "./DeleteSermonDialog";
 
 interface SermonDetailProps {
   sermonId: string;
@@ -31,7 +37,9 @@ interface SermonDetailProps {
 
 export function SermonDetail({ sermonId }: SermonDetailProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [imageError, setImageError] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery<ApiResponse<ISermon>>({
     queryKey: ["sermon", sermonId],
@@ -41,8 +49,35 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
 
   const sermon = data?.data;
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => sermonsApi.deleteSermon(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allSermons"] });
+      toast.success("Success", {
+        description: "Sermon deleted successfully",
+      });
+      router.push("/dashboard/sermons");
+    },
+    onError: (error: AxiosError<ApiErrorResponse>) => {
+      toast.error("Error", {
+        description: error.response?.data?.message || "Failed to delete sermon",
+      });
+    },
+  });
+
   const handleBack = () => {
     router.push("/dashboard/sermons");
+  };
+
+  const handleDelete = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (sermon) {
+      deleteMutation.mutate(sermon._id);
+    }
+    setDeleteDialogOpen(false);
   };
 
   if (isLoading) {
@@ -63,27 +98,42 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={handleBack}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBack}
+            className="shrink-0"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Sermon Details
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">
+              {sermon.title}
             </h1>
-            <p className="text-muted-foreground">
-              View and manage sermon information
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Sermon details and information
             </p>
           </div>
         </div>
 
-        <Button asChild>
-          <Link href={`/dashboard/sermons/${sermonId}/edit`}>
-            <Edit className="h-4 w-4" />
-            Edit Sermon
-          </Link>
-        </Button>
+        <div className="flex gap-2 flex-wrap justify-end sm:justify-start">
+          <Button asChild variant="outline">
+            <Link href={`/dashboard/sermons/${sermonId}/edit`}>
+              <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              Edit Sermon
+            </Link>
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending}
+          >
+            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            Delete
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -181,9 +231,10 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
               {sermon.scripture && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>📖 Scripture</span>
+                    <BookOpen className="h-4 w-4" />
+                    <span> Scripture</span>
                   </div>
-                  <p className="font-medium">{sermon.scripture}</p>
+                  <p className="font-medium capitalize">{sermon.scripture}</p>
                 </div>
               )}
 
@@ -253,6 +304,14 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
           </Card>
         </div>
       </div>
+
+      <DeleteSermonDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        sermon={sermon}
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   );
 }
