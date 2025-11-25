@@ -1,9 +1,8 @@
-import React from 'react'
+import { EventForm } from "@/components/dashboard/events/EventForm";
+import React from "react";
 
-const page = () => {
-  return (
-    <div>page</div>
-  )
-}
+const CreateEventPage = () => {
+  return <EventForm />;
+};
 
-export default page
+export default CreateEventPage;

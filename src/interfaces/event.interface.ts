@@ -1,18 +1,45 @@
-export interface Event {
+import { IUser } from "./user.interface";
+
+export interface IEvent {
   _id: string;
   title: string;
   description: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   time: string;
   location: string;
+  requiresRegistration: boolean;
   maxAttendees?: number;
-  registeredUsers: string[];
-  imageUrl?: string;
+  registeredUsers: IUser[];
+  image?: IMedia | null;
   isPublished: boolean;
-  createdBy: {
-    _id: string;
-    name: string;
-  };
+  createdBy: IUser;
+  isMultiDay: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface IMedia {
+  url: string;
+  publicId: string;
+}
+
+export interface ListEventsParams {
+  page: number;
+  limit?: number;
+  search?: string;
+  upcoming?: boolean;
+  past?: boolean;
+  startDate?: string;
+  endDate?: string;
+  isPublished?: boolean;
+  requiresRegistration?: boolean;
+}
+
+export interface EventStats {
+  totalEvents: number;
+  upcomingEvents: number;
+  pastEvents: number;
+  totalRegistrations: number;
+  eventsRequiringRegistration: number;
 }
