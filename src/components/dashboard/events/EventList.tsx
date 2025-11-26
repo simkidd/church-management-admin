@@ -69,7 +69,7 @@ export function EventList() {
   const router = useRouter();
   const [filters, setFilters] = useState<ListEventsParams>({
     page: 1,
-    limit: 2,
+    limit: 10,
   });
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -144,7 +144,7 @@ export function EventList() {
     setSearch("");
     setFilters({
       page: 1,
-      limit: 2,
+      limit: 10,
     });
     debouncedSearch.cancel();
   };

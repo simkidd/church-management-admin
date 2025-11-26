@@ -37,7 +37,7 @@ export function DeleteEventDialog({
   const deleteMutation = useMutation({
     mutationFn: (id: string) => eventsApi.deleteEvent(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["allEvents"] });
       toast.success("Success", {
         description: "Event deleted successfully",
       });
@@ -79,7 +79,10 @@ export function DeleteEventDialog({
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={handleDelete}
+            onClick={(e) => {
+              e.preventDefault();
+              handleDelete();
+            }}
             disabled={deleteMutation.isPending}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >

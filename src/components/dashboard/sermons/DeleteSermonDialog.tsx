@@ -33,18 +33,22 @@ export function DeleteSermonDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the sermon <span className="font-semibold text-foreground">
-                {" "}
-                {sermon?.title}{" "}
-              </span>.
-            This action cannot be undone and will also remove associated video
+            This will permanently delete the sermon{" "}
+            <span className="font-semibold text-foreground">
+              {" "}
+              {sermon?.title}{" "}
+            </span>
+            . This action cannot be undone and will also remove associated video
             and thumbnail files.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
             disabled={isLoading}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
