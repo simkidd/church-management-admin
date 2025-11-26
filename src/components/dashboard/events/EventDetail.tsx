@@ -25,6 +25,7 @@ import { eventsApi } from "@/lib/api/event.api";
 import { ApiResponse } from "@/interfaces/response.interface";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface EventDetailProps {
   id: string;
@@ -48,31 +49,16 @@ export function EventDetail({ id }: EventDetailProps) {
   // Handle error state
   if (error || !event) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/dashboard/events")}
-          >
-            <ArrowLeft className="h-4 w-4" />
+      <EmptyState
+        icon={Calendar}
+        title="Event Not Found"
+        description="Failed to load event. Please try again."
+        action={
+          <Button onClick={() => router.push("/dashboard/events")}>
+            Back to Events
           </Button>
-          <h1 className="text-3xl font-bold tracking-tight">Event Details</h1>
-        </div>
-
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {error
-              ? "Failed to load event details. Please try again."
-              : "Event not found."}
-          </AlertDescription>
-        </Alert>
-
-        <Button onClick={() => router.push("/dashboard/events")}>
-          Back to Events
-        </Button>
-      </div>
+        }
+      />
     );
   }
 

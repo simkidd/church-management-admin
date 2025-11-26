@@ -162,18 +162,18 @@ const navGroups: INavGroup[] = [
         roles: ["super-admin", "admin", "pastor"],
         icon: Calendar,
       },
-      {
-        title: "My Events",
-        url: "/dashboard/events/created",
-        roles: ["super-admin", "admin", "pastor"],
-        icon: User,
-      },
-      {
-        title: "Event Registrations",
-        url: "/dashboard/events/registrations",
-        roles: ["super-admin", "admin", "pastor"],
-        icon: Users,
-      },
+      // {
+      //   title: "My Events",
+      //   url: "/dashboard/events/created",
+      //   roles: ["super-admin", "admin", "pastor"],
+      //   icon: User,
+      // },
+      // {
+      //   title: "Event Registrations",
+      //   url: "/dashboard/events/registrations",
+      //   roles: ["super-admin", "admin", "pastor"],
+      //   icon: Users,
+      // },
     ],
   },
   // {

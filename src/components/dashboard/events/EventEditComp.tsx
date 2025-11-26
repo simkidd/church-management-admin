@@ -30,7 +30,7 @@ const EventEditComp = ({ eventId }: { eventId: string }) => {
     return (
       <EmptyState
         icon={Calendar}
-        title="Sermon Not Found"
+        title="Event Not Found"
         description="Failed to load event. Please try again."
         action={<Button onClick={() => router.back()}>Go Back</Button>}
       />
