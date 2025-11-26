@@ -1,6 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EventList } from "@/components/dashboard/events/EventList"
 import { Button } from "@/components/ui/button"
-import { EventCalendar } from "@/components/dashboard/events/EventCalendar"
 import { Plus } from "lucide-react"
 import Link from "next/link"
 
@@ -14,20 +13,13 @@ export default function EventsPage() {
         </div>
         <Link href="/dashboard/events/create">
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4" />
             Create Event
           </Button>
         </Link>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Event Calendar</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <EventCalendar />
-        </CardContent>
-      </Card>
+       <EventList />
     </div>
   )
 }
