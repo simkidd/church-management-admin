@@ -14,15 +14,19 @@ import { format } from "date-fns";
 import {
   ArrowLeft,
   BookOpen,
-  BookOpenCheckIcon,
   Calendar,
+  Clock,
   Edit,
   Eye,
+  ListChecks,
   MicIcon,
   Play,
+  Tag,
   Trash2,
   User,
   Volume2,
+  Layers,
+  Hash,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,6 +35,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { DeleteSermonDialog } from "./DeleteSermonDialog";
 import { useSermonView } from "@/hooks/useSermonView";
+import { formatVideoDuration } from "@/utils/helpers/time";
 
 interface SermonDetailProps {
   sermonId: string;
@@ -115,9 +120,14 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">
               {sermon.title}
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              Sermon details and information
-            </p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+              {sermon.slug && (
+                <>
+                  <Hash className="h-3 w-3" />
+                  <span className="truncate">{sermon.slug}</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -144,8 +154,14 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
         <div className="lg:col-span-2 space-y-6">
           {/* Video Player */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Video</CardTitle>
+              {sermon.duration && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>{formatVideoDuration(sermon.duration)}</span>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <div className="aspect-video bg-black rounded-lg overflow-hidden">
@@ -176,6 +192,30 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
               </p>
             </CardContent>
           </Card>
+
+          {/* Key Takeaways */}
+          {sermon.keyTakeaways && sermon.keyTakeaways.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ListChecks className="h-5 w-5" />
+                  Key Takeaways
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {sermon.keyTakeaways.map((takeaway, index) => (
+                    <li key={index} className="flex gap-3">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-medium mt-0.5">
+                        {index + 1}
+                      </div>
+                      <span className="text-muted-foreground">{takeaway}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -221,6 +261,16 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
                 </p>
               </div>
 
+              {sermon.series && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Layers className="h-4 w-4" />
+                    <span>Series</span>
+                  </div>
+                  <p className="font-medium">{sermon.series.title}</p>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
@@ -237,7 +287,17 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
                     <BookOpen className="h-4 w-4" />
                     <span> Scripture</span>
                   </div>
-                  <p className="font-medium capitalize">{sermon.scripture}</p>
+                  <p className="font-medium">{sermon.scripture}</p>
+                </div>
+              )}
+
+              {sermon.category && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Tag className="h-4 w-4" />
+                    <span>Category</span>
+                  </div>
+                  <p className="font-medium">{sermon.category}</p>
                 </div>
               )}
 
@@ -253,9 +313,19 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span>Status</span>
                 </div>
-                <Badge variant={sermon.isPublished ? "default" : "secondary"}>
-                  {sermon.isPublished ? "Published" : "Draft"}
-                </Badge>
+                <div className="flex gap-2">
+                  <Badge variant={sermon.isPublished ? "default" : "secondary"}>
+                    {sermon.isPublished ? "Published" : "Draft"}
+                  </Badge>
+                  {sermon.isFeatured && (
+                    <Badge
+                      variant="outline"
+                      className="bg-primary/10 text-primary border-primary/20"
+                    >
+                      Featured
+                    </Badge>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -308,6 +378,21 @@ export function SermonDetail({ sermonId }: SermonDetailProps) {
         </div>
       </div>
 
+      {/* Metadata Footer */}
+      <div className="pt-4 border-t">
+        <div className="text-sm text-muted-foreground">
+          <p>
+            Created: {format(new Date(sermon.createdAt), "MMMM dd, yyyy")}
+            {sermon.createdAt !== sermon.updatedAt && (
+              <>
+                {" "}
+                • Updated: {format(new Date(sermon.updatedAt), "MMMM dd, yyyy")}
+              </>
+            )}
+          </p>
+        </div>
+      </div>
+
       <DeleteSermonDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
@@ -339,8 +424,9 @@ function SermonDetailSkeleton() {
         <div className="lg:col-span-2 space-y-6">
           {/* Video Skeleton */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <Skeleton className="h-6 w-20" />
+              <Skeleton className="h-5 w-16" />
             </CardHeader>
             <CardContent>
               <Skeleton className="aspect-video w-full rounded-lg" />
@@ -356,6 +442,21 @@ function SermonDetailSkeleton() {
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-3/4" />
+            </CardContent>
+          </Card>
+
+          {/* Key Takeaways Skeleton */}
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex gap-3">
+                  <Skeleton className="h-6 w-6 rounded-full" />
+                  <Skeleton className="h-5 flex-1" />
+                </div>
+              ))}
             </CardContent>
           </Card>
         </div>
@@ -378,12 +479,26 @@ function SermonDetailSkeleton() {
               <Skeleton className="h-6 w-32" />
             </CardHeader>
             <CardContent className="space-y-4">
-              {[...Array(5)].map((_, i) => (
+              {[...Array(8)].map((_, i) => (
                 <div key={i} className="space-y-2">
                   <Skeleton className="h-4 w-16" />
                   <Skeleton className="h-5 w-24" />
                 </div>
               ))}
+            </CardContent>
+          </Card>
+
+          {/* Tags Skeleton */}
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-16" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-6 w-12" />
+                <Skeleton className="h-6 w-20" />
+              </div>
             </CardContent>
           </Card>
 
