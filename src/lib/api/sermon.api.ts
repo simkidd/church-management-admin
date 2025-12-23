@@ -39,9 +39,9 @@ export const sermonsApi = {
     data: FormData,
     onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined
   ): Promise<ApiResponse<{ sermon: ISermon }>> => {
-    const response = await api.put(`/sermons/${id}/update`, data, {
+    const response = await api.patch(`/sermons/${id}/update`, data, {
       headers: { "Content-Type": "multipart/form-data" },
-      onUploadProgress
+      onUploadProgress,
     });
     return response.data;
   },

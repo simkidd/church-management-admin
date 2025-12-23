@@ -3,15 +3,25 @@ import { IUser } from "./user.interface";
 export interface ISermon {
   _id: string;
   title: string;
+  slug: string;
   description: string;
+  keyTakeaways?: string[];
+  series?: {
+    _id: string;
+    title: string;
+    slug: string;
+  };
   preacher: IUser;
   video: IMedia;
   audioUrl?: string | null;
   thumbnail?: IMedia | null;
   datePreached: string;
+  duration?: number;
   scripture?: string;
   tags?: string[];
+  category?: string;
   isPublished: boolean;
+  isFeatured: boolean;
   views: number;
   createdAt: string;
   updatedAt: string;
