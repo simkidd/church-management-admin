@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getPaginationRange } from "@/components/shared/DataTable";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
   CardContent,
@@ -10,16 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,34 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Search,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
-  Play,
-  Volume2,
-  Filter,
-  X,
-  CalendarIcon,
-  Mic,
-  RefreshCw,
-} from "lucide-react";
-import { format } from "date-fns";
-import { sermonsApi } from "@/lib/api/sermon.api";
-import { toast } from "sonner";
-import { AxiosError } from "axios";
-import { ApiErrorResponse } from "@/interfaces/response.interface";
-import { ISermon, ListSermonsParams } from "@/interfaces/sermon.interface";
-import useSermons from "@/hooks/useSermons";
+import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -64,21 +29,54 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { cn } from "@/lib/utils";
-import { getPaginationRange } from "@/components/shared/DataTable";
-import { debounce } from "@/utils/helpers/debounce";
-import { DeleteSermonDialog } from "./DeleteSermonDialog";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DateRange } from "react-day-picker";
-import { Calendar } from "@/components/ui/calendar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/shared/EmptyState";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import useSermons from "@/hooks/useSermons";
+import { ApiErrorResponse } from "@/interfaces/response.interface";
+import { ISermon, ListSermonsParams } from "@/interfaces/sermon.interface";
+import { sermonsApi } from "@/lib/api/sermon.api";
+import { cn } from "@/lib/utils";
+import { debounce } from "@/utils/helpers/debounce";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { format } from "date-fns";
+import {
+  CalendarIcon,
+  Edit,
+  Mic,
+  MoreHorizontal,
+  Play,
+  RefreshCw,
+  Search,
+  Trash2,
+  Volume2,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useCallback, useMemo, useState } from "react";
+import { DateRange } from "react-day-picker";
+import { toast } from "sonner";
+import { DeleteSermonDialog } from "./DeleteSermonDialog";
+import { formatVideoDuration } from "@/utils/helpers/time";
 
 const ActionComp = ({ sermon }: { sermon: ISermon }) => {
   const queryClient = useQueryClient();
@@ -262,6 +260,7 @@ export function SermonList() {
     );
   }, [filters]);
 
+  
   return (
     <div className="space-y-6">
       <Card>
@@ -403,7 +402,7 @@ export function SermonList() {
                   <TableHead>Date Preached</TableHead>
                   <TableHead>Views</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Tags</TableHead>
+                  <TableHead>Duration</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -455,22 +454,7 @@ export function SermonList() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-wrap gap-1 max-w-[200px]">
-                          {sermon.tags?.slice(0, 2).map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                          {sermon.tags && sermon.tags.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{sermon.tags.length - 2}
-                            </Badge>
-                          )}
-                        </div>
+                        {formatVideoDuration(sermon.duration)}
                       </TableCell>
                       <TableCell>
                         <ActionComp sermon={sermon} />

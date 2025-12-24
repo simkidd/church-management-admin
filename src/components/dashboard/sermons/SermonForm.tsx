@@ -30,6 +30,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import usePastors from "@/hooks/use-pastors";
+import { useSeriesList } from "@/hooks/useSeriesList";
 import { ApiErrorResponse } from "@/interfaces/response.interface";
 import { ISermon } from "@/interfaces/sermon.interface";
 import { sermonsApi } from "@/lib/api/sermon.api";
@@ -68,8 +69,20 @@ const sermonSchema = z.object({
     error: "Date preached is required",
   }),
   scripture: z.string().optional(),
+  audioUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  duration: z
+    .string()
+    .refine((val) => !val || /^\d+$/.test(val), {
+      message: "Duration must be a number in seconds",
+    })
+    .optional()
+    .or(z.literal("")),
+  category: z.string().optional(),
   tags: z.string().optional(),
+  keyTakeaways: z.string().optional(),
+  series: z.string().optional(),
   isPublished: z.boolean(),
+  isFeatured: z.boolean(),
 });
 
 type SermonFormValues = z.infer<typeof sermonSchema>;
@@ -85,9 +98,21 @@ interface UploadProgress {
   total: number;
 }
 
+const CATEGORY_OPTIONS = [
+  "Teaching",
+  "Worship",
+  "Prophecy",
+  "Healing",
+  "Testimony",
+  "Evangelism",
+  "Bible Study",
+];
+
 export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { series: seriesOptions = [], isPending: isLoadingSeries } =
+    useSeriesList();
 
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
@@ -95,6 +120,8 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
   const [thumbnailPreview, setThumbnailPreview] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  const [keyTakeaways, setKeyTakeaways] = useState<string[]>([]);
+  const [keyTakeawayInput, setKeyTakeawayInput] = useState("");
   const [openDate, setOpenDate] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
     video: 0,
@@ -182,11 +209,17 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
     defaultValues: {
       title: "",
       description: "",
-      preacher: "",
+      preacher: sermon?.preacher._id || "",
       datePreached: new Date(),
       scripture: "",
+      audioUrl: "",
+      duration: "",
+      category: "",
       isPublished: true,
+      isFeatured: false,
       tags: "",
+      keyTakeaways: "",
+      series: sermon?.series?._id || "",
     },
   });
 
@@ -202,28 +235,28 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
         preacher: sermon.preacher._id,
         datePreached: datePreached,
         scripture: sermon.scripture || "",
+        audioUrl: sermon.audioUrl || "",
+        duration: sermon.duration?.toString() || "",
+        category: sermon.category || "",
         isPublished: sermon.isPublished,
+        isFeatured: sermon.isFeatured,
         tags: sermon.tags?.join(", ") || "",
+        keyTakeaways: sermon.keyTakeaways?.join(", ") || "",
+        series: sermon.series?._id || "",
       });
+
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTags(sermon.tags || []);
+      setKeyTakeaways(sermon.keyTakeaways || []);
+
+      if (sermon.video?.url) {
+        setVideoPreview(sermon.video.url);
+      }
+      if (sermon.thumbnail?.url) {
+        setThumbnailPreview(sermon.thumbnail.url);
+      }
     }
   }, [sermon, isEdit, form]);
-
-  useEffect(() => {
-    if (sermon && isEdit) {
-      const timer = setTimeout(() => {
-        setTags(sermon.tags || []);
-
-        if (sermon.video?.url) {
-          setVideoPreview(sermon.video.url);
-        }
-        if (sermon.thumbnail?.url) {
-          setThumbnailPreview(sermon.thumbnail.url);
-        }
-      }, 0);
-
-      return () => clearTimeout(timer);
-    }
-  }, []);
 
   // Video dropzone configuration
   const onVideoDrop = useCallback((acceptedFiles: File[]) => {
@@ -305,14 +338,26 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
+  const addKeyTakeaway = () => {
+    const takeaway = keyTakeawayInput.trim();
+    if (takeaway && !keyTakeaways.includes(takeaway)) {
+      setKeyTakeaways([...keyTakeaways, takeaway]);
+      setKeyTakeawayInput("");
+    }
+  };
+
+  const removeKeyTakeaway = (takeawayToRemove: string) => {
+    setKeyTakeaways(keyTakeaways.filter((item) => item !== takeawayToRemove));
+  };
+
   const handleCancel = () => {
-    // Show confirmation if there's any data entered
     const hasData =
       form.getValues().title ||
       form.getValues().description ||
       videoFile ||
       thumbnailFile ||
-      tags.length > 0;
+      tags.length > 0 ||
+      keyTakeaways.length > 0;
 
     if (hasData) {
       const confirmCancel = window.confirm(
@@ -325,7 +370,18 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
   };
 
   const onSubmit = async (values: SermonFormValues) => {
-    if (!videoFile && !isEdit && !sermon?.video?.url) {
+    // For creation, video file is required
+    if (!isEdit && !videoFile) {
+      toast.error("Error", {
+        description: "Video file is required for new sermons",
+      });
+      return;
+    }
+
+    // For update, if there's existing video, we don't need to upload new one
+    const shouldUploadVideo =
+      videoFile && (isEdit ? !sermon?.video?.url : true);
+    if (!shouldUploadVideo && !isEdit) {
       toast.error("Error", {
         description: "Video file is required",
       });
@@ -336,24 +392,59 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
 
     // Append form values
     Object.entries(values).forEach(([key, value]) => {
-      if (key !== "tags" && value !== undefined) {
-        if (key === "datePreached" && value instanceof Date) {
-          // Format date to ISO string for backend
-          formData.append(key, value.toISOString());
-        } else {
-          formData.append(key, value.toString());
-        }
+      if (
+        value === undefined ||
+        value === null ||
+        (value === "" && key !== "series") ||
+        key === "tags" ||
+        key === "keyTakeaways"
+      ) {
+        return;
+      }
+
+      if (key === "datePreached" && value instanceof Date) {
+        formData.append(key, value.toISOString());
+      } else {
+        formData.append(key, value.toString());
       }
     });
 
-    // Append tags
-    formData.append("tags", tags.join(","));
+    // TAGS
+    if (tags !== undefined) {
+      if (tags.length === 0) {
+        formData.append("tags", ""); // explicit clear
+      } else {
+        formData.append("tags", tags.join(","));
+      }
+    }
+
+    // KEY TAKEAWAYS
+    if (keyTakeaways !== undefined) {
+      if (keyTakeaways.length === 0) {
+        formData.append("keyTakeaways", "");
+      } else {
+        formData.append("keyTakeaways", keyTakeaways.join(","));
+      }
+    }
 
     // Append files
-    formData.append("video", videoFile!);
+    if (videoFile) {
+      formData.append("video", videoFile);
+    }
 
     if (thumbnailFile) {
       formData.append("thumbnail", thumbnailFile);
+    }
+
+    // For update, check if we need to remove thumbnail
+    if (
+      isEdit &&
+      sermon &&
+      !thumbnailFile &&
+      !thumbnailPreview &&
+      sermon.thumbnail
+    ) {
+      formData.append("removeThumbnail", "true");
     }
 
     if (isEdit && sermon) {
@@ -432,8 +523,8 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
                         <FormItem>
                           <FormLabel>Preacher *</FormLabel>
                           <Select
+                            value={field.value}
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
                           >
                             <FormControl>
                               <SelectTrigger className="w-full">
@@ -529,6 +620,121 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
                       </FormItem>
                     )}
                   />
+
+                  {/* <FormField
+                    control={form.control}
+                    name="audioUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Audio URL</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="https://example.com/audio.mp3"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Optional: Direct link to audio file
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  /> */}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                    <FormField
+                      control={form.control}
+                      name="duration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Duration (seconds)</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., 3600 for 1 hour"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Length of the video in seconds
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CATEGORY_OPTIONS.map((category) => (
+                                  <SelectItem key={category} value={category}>
+                                    {category}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Key Takeaways */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Key Takeaways</h3>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Add a key takeaway"
+                        value={keyTakeawayInput}
+                        onChange={(e) => setKeyTakeawayInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addKeyTakeaway();
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        onClick={addKeyTakeaway}
+                        variant="outline"
+                      >
+                        Add
+                      </Button>
+                    </div>
+                    <div className="space-y-2">
+                      {keyTakeaways.map((takeaway) => (
+                        <div
+                          key={takeaway}
+                          className="flex items-center justify-between p-2 bg-muted rounded-lg"
+                        >
+                          <span className="text-sm">{takeaway}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeKeyTakeaway(takeaway)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Tags */}
@@ -560,11 +766,73 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
                           onClick={() => removeTag(tag)}
                         >
                           {tag}
-                          <X className="h-3 w-3 " />
+                          <X className="h-3 w-3" />
                         </Badge>
                       ))}
                     </div>
                   </div>
+                </div>
+
+                {/* Series */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Series</h3>
+                  <FormField
+                    control={form.control}
+                    name="series"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Series (Optional)</FormLabel>
+                        <FormControl>
+                          <div className="flex items-center gap-2">
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select series" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {isLoadingSeries ? (
+                                  <SelectItem value="loading" disabled>
+                                    Loading series...
+                                  </SelectItem>
+                                ) : seriesOptions?.length === 0 ? (
+                                  <SelectItem value="none" disabled>
+                                    No series found
+                                  </SelectItem>
+                                ) : (
+                                  seriesOptions.map((series) => (
+                                    <SelectItem
+                                      key={series._id}
+                                      value={series._id}
+                                    >
+                                      {series.title}
+                                    </SelectItem>
+                                  ))
+                                )}
+                              </SelectContent>
+                            </Select>
+
+                            {field.value && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => form.setValue("series", "")}
+                              >
+                                Remove series
+                              </Button>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Link this sermon to a series
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -588,7 +856,7 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
                     <div
                       {...videoDropzone.getRootProps()}
                       className={cn(
-                        "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors aspect-video",
+                        "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
                         videoDropzone.isDragActive
                           ? "border-primary bg-primary/5"
                           : "border-muted-foreground/25",
@@ -597,7 +865,7 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
                     >
                       <input {...videoDropzone.getInputProps()} />
                       {videoPreview ? (
-                        <div className="space-y-2 aspect-video">
+                        <div className="space-y-2">
                           <video
                             src={videoPreview}
                             className="w-full h-32 object-cover rounded"
@@ -617,20 +885,22 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
                             >
                               Change Video
                             </Button>
-                            <div className="text-xs text-muted-foreground text-left">
-                              <p>{videoFile?.name}</p>
-                              <p>
-                                {videoFile?.size &&
-                                  (videoFile?.size / (1024 * 1024)).toFixed(
-                                    2
-                                  )}{" "}
-                                MB
-                              </p>
-                            </div>
+                            {!isEdit && (
+                              <div className="text-xs text-muted-foreground text-left">
+                                <p>{videoFile?.name}</p>
+                                <p>
+                                  {videoFile?.size &&
+                                    (videoFile?.size / (1024 * 1024)).toFixed(
+                                      2
+                                    )}{" "}
+                                  MB
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center aspect-video">
+                        <div className="flex flex-col items-center justify-center h-32">
                           {videoDropzone.isDragActive ? (
                             <FileIcon className="h-8 w-8 mx-auto text-primary" />
                           ) : (
@@ -679,7 +949,7 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
                     <div
                       {...thumbnailDropzone.getRootProps()}
                       className={cn(
-                        "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors aspect-video",
+                        "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
                         thumbnailDropzone.isDragActive
                           ? "border-primary bg-primary/5"
                           : "border-muted-foreground/25",
@@ -709,20 +979,23 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
                             >
                               Change Thumbnail
                             </Button>
-                            <div className="text-xs text-muted-foreground text-left">
-                              <p>{thumbnailFile?.name}</p>
-                              <p>
-                                {thumbnailFile?.size &&
-                                  (thumbnailFile?.size / (1024 * 1024)).toFixed(
-                                    2
-                                  )}{" "}
-                                MB
-                              </p>
-                            </div>
+                            {!isEdit && (
+                              <div className="text-xs text-muted-foreground text-left">
+                                <p>{thumbnailFile?.name}</p>
+                                <p>
+                                  {thumbnailFile?.size &&
+                                    (
+                                      thumbnailFile?.size /
+                                      (1024 * 1024)
+                                    ).toFixed(2)}{" "}
+                                  MB
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center aspect-video">
+                        <div className="flex flex-col items-center justify-center h-32">
                           {thumbnailDropzone.isDragActive ? (
                             <File className="h-8 w-8 mx-auto text-primary" />
                           ) : (
@@ -785,6 +1058,27 @@ export function SermonForm({ sermon, isEdit = false }: SermonFormProps) {
                           <FormLabel>Published</FormLabel>
                           <FormDescription>
                             Make this sermon publicly visible
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="isFeatured"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel>Featured</FormLabel>
+                          <FormDescription>
+                            Make this sermon featured
                           </FormDescription>
                         </div>
                         <FormControl>
