@@ -56,6 +56,8 @@ const courseFormSchema = z.object({
     .min(2, "Duration is required")
     .max(30, "Duration must be less than 30 characters"),
   isPublished: z.boolean(),
+  isFeatured: z.boolean(),
+  category: z.string(),
 });
 
 type CourseFormData = z.infer<typeof courseFormSchema>;
@@ -92,7 +94,9 @@ const CourseForm = ({
       description: initialValues?.description || "",
       instructor: initialValues?.instructor?._id || "",
       duration: initialValues?.duration || "",
+      category: initialValues?.category || "",
       isPublished: initialValues?.isPublished || false,
+      isFeatured: initialValues?.isFeatured || false,
     },
   });
 
@@ -163,9 +167,15 @@ const CourseForm = ({
     const formData = new FormData();
 
     // Append form fields
-    Object.entries(values).forEach(([key, value]) => {
-      formData.append(key, value.toString());
-    });
+    formData.append("title", values.title);
+    formData.append("description", values.description);
+    formData.append("instructor", values.instructor);
+    formData.append("duration", values.duration || "Unspecified");
+
+    formData.append("isPublished", String(values.isPublished));
+    formData.append("isFeatured", String(values.isFeatured));
+
+    if (values.category) formData.append("category", values.category);
 
     // Append image file if exists
     if (imageFile) {
@@ -226,7 +236,7 @@ const CourseForm = ({
             <Field>
               <FieldLabel>Course Thumbnail</FieldLabel>
               {previewImage ? (
-                <div className="relative aspect-video rounded-lg border-2 border-dashed">
+                <div className="relative aspect-video rounded-lg border-2 border-dashed h-full w-full">
                   <Image
                     src={previewImage}
                     alt="Course thumbnail preview"
@@ -408,8 +418,27 @@ const CourseForm = ({
               )}
             />
 
-            {/* Published Status */}
+            {/* Category */}
             <Controller
+              name="category"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Category</FieldLabel>
+                  <Input
+                    {...field}
+                    placeholder="Enter course category"
+                    disabled={isLoading}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            {/* Published Status */}
+            {/* <Controller
               name="isPublished"
               control={form.control}
               render={({ field }) => (
@@ -435,10 +464,38 @@ const CourseForm = ({
                   </div>
                 </div>
               )}
-            />
+            /> */}
+
+            {/* Featured Status */}
+            {/* <Controller
+              name="isFeatured"
+              control={form.control}
+              render={({ field }) => (
+                <div className="border rounded-xl p-4 bg-muted/30 hover:bg-muted/40 transition-all flex items-start gap-3 mt-2">
+                  <Checkbox
+                    id="isFeatured"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                    className="mt-0.5 h-5 w-5 border-primary text-primary data-[state=checked]:bg-primary"
+                  />
+                  <div className="flex flex-col space-y-1">
+                    <label
+                      htmlFor="isFeatured"
+                      className="text-sm font-semibold cursor-pointer leading-none"
+                    >
+                      Feature this course
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      Featured courses appear prominently on the platform.
+                    </p>
+                  </div>
+                </div>
+              )}
+            /> */}
           </FieldGroup>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter className="mt-8">
             <Button
               type="button"
               variant="outline"

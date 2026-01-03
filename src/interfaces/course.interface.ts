@@ -5,28 +5,17 @@ export interface ICourse {
   title: string;
   description: string;
   instructor?: IUser;
-  lessons?: ILesson[];
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
   thumbnail?: {
     url: string;
     publicId: string;
   };
   isPublished: boolean;
-  enrolledStudents: IUser[];
+  isFeatured: boolean;
   duration: string;
-}
+  category?: string;
 
-export interface ILesson {
-  _id: string;
-  title: string;
-  content: string;
-  video?: {
-    url: string;
-    publicId: string;
-  };
-  duration?: number;
-  order: number;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface ListCourseParams {

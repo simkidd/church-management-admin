@@ -30,18 +30,8 @@ export const CourseDetailsOverviewTab = ({ course }: OverviewTabProps) => {
                 {/* {formatDuration(course.duration)} */}
               </span>
             </div>
-            <div>
-              <span className="font-medium">Total Lessons:</span>
-              <span className="text-muted-foreground ml-2">
-                {course.lessons?.length || 0}
-              </span>
-            </div>
-            <div>
-              <span className="font-medium">Enrolled Students:</span>
-              <span className="text-muted-foreground ml-2">
-                {course.enrolledStudents?.length || 0}
-              </span>
-            </div>
+           
+           
             <div>
               <span className="font-medium">Last Updated:</span>
               <span className="text-muted-foreground ml-2">
