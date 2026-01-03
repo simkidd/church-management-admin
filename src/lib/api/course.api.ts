@@ -4,7 +4,7 @@ import {
   PaginatedResponse,
 } from "@/interfaces/response.interface";
 import api from "../axios";
-import { IExam } from "@/interfaces/exam.interface";
+import { IModuleWithLessons } from "@/interfaces/module.interface";
 
 export const courseApi = {
   //  GET all courses
@@ -51,6 +51,19 @@ export const courseApi = {
     id: string
   ): Promise<ApiResponse<{ message: string }>> => {
     const response = await api.delete(`/courses/${id}/delete`);
+    return response.data;
+  },
+
+  // get course modules
+  getCourseModules: async (
+    courseId: string
+  ): Promise<
+    ApiResponse<{
+      course: ICourse;
+      modules: IModuleWithLessons[];
+    }>
+  > => {
+    const response = await api.get(`/courses/${courseId}/modules`);
     return response.data;
   },
 

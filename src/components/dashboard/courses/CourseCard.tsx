@@ -131,10 +131,10 @@ const CourseCard = ({ course }: { course: ICourse }) => {
 
         <CardContent className="flex flex-col gap-4 h-full pb-6">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
+            {/* <div className="flex items-center gap-1">
               <BookOpen className="h-4 w-4" />
               <span>{course?.lessons?.length || 0} lessons</span>
-            </div>
+            </div> */}
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
               <span>{course.duration || "N/A"}</span>
