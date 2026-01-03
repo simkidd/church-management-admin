@@ -69,7 +69,7 @@ const sermonSchema = z.object({
     error: "Date preached is required",
   }),
   scripture: z.string().optional(),
-  audioUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  audioUrl: z.url("Must be a valid URL").optional().or(z.literal("")),
   duration: z
     .string()
     .refine((val) => !val || /^\d+$/.test(val), {

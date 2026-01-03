@@ -1,6 +1,23 @@
 "use client";
 
-import { EmptyState } from "@/components/shared/EmptyState";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import { ICourse } from "@/interfaces/course.interface";
+import courseApi from "@/lib/api/course.api";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,11 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ICourse } from "@/interfaces/course.interface";
-import { ApiErrorResponse, ApiResponse } from "@/interfaces/response.interface";
-import courseApi from "@/lib/api/course.api";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import {
   ArrowLeft,
   BookOpen,
@@ -27,38 +40,98 @@ import {
   MoreVertical,
   Trash2,
 } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { CourseDetailsAnalyticsTab } from "./CourseDetailAnalyticsTab";
-import { CourseDetailsOverviewTab } from "./CourseDetailsOverviewTab";
-import { CourseDetailsSkeleton } from "./CourseDetailsSkeleton";
-import { EnrolledStudentsTab } from "./EnrolledStudentsTab";
-import { LessonsTab } from "./LessonsTab";
-import { toast } from "sonner";
+
+import { IModuleWithLessons } from "@/interfaces/module.interface";
+import { ApiErrorResponse, ApiResponse } from "@/interfaces/response.interface";
 import { AxiosError } from "axios";
-import { format } from "date-fns";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { CourseBuilderTab } from "./CourseBuilderTab";
+import { CourseDetailsSkeleton } from "./CourseDetailsSkeleton";
 import CourseForm from "./CourseForm";
+import { CourseDetailsOverviewTab } from "./CourseDetailsOverviewTab";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmptyState } from "@/components/shared/EmptyState";
+import Link from "next/link";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import ExamsTab from "./ExamsTab";
+import { format } from "date-fns";
 
-const CourseDetails = ({ courseId }: { courseId: string }) => {
-  const queryClient = useQueryClient();
-  const searchParams = useSearchParams();
+const CourseBuilderPage = ({ courseId }: { courseId: string }) => {
   const router = useRouter();
-
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const urlTab = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState(urlTab || "overview");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  /** Fetch course info */
+  const {
+    data: courseData,
+    isPending: isCourseLoading,
+    error: courseError,
+  } = useQuery<ApiResponse<ICourse>>({
+    queryKey: ["course", courseId],
+    queryFn: () => courseApi.getCourseById(courseId),
+  });
+
+  /** Fetch modules + lessons */
+  const { data: modulesData, isPending: isModulesLoading } = useQuery<
+    ApiResponse<{
+      course: ICourse;
+      modules: IModuleWithLessons[];
+    }>
+  >({
+    queryKey: ["course-modules", courseId],
+    queryFn: () => courseApi.getCourseModules(courseId),
+    enabled: !!courseData,
+  });
+
+  const course = courseData?.data as ICourse;
+  const modules = modulesData?.data?.modules ?? [];
+
+  // Publish / Unpublish Mutation
+  const togglePublishMutation = useMutation({
+    mutationFn: (isPublished: boolean) => {
+      const formData = new FormData();
+      formData.append("isPublished", isPublished.toString());
+      return courseApi.updateCourse(course?._id, formData);
+    },
+    onSuccess: (data) => {
+      const action = data.data.course.isPublished ? "published" : "unpublished";
+      toast.success(`Course ${action} successfully`, {
+        description: `${data.data.course.title} has been ${action}.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["course", course?._id] });
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      queryClient.invalidateQueries({ queryKey: ["courses-infinite"] });
+      queryClient.invalidateQueries({ queryKey: ["course-modules", course._id] });
+    },
+    onError: (error: AxiosError<ApiErrorResponse>) => {
+      toast.error("Update Failed", {
+        description:
+          error.response?.data?.message || "Failed to update course status.",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => courseApi.deleteCourse(id),
+    onSuccess: (data) => {
+      toast.success("Success!", { description: data.message });
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      setIsDeleteDialogOpen(false);
+      router.push("/dashboard/courses");
+    },
+    onError: (error: AxiosError<ApiErrorResponse>) => {
+      toast.error("Delete Failed", {
+        description:
+          error.response?.data?.message || "Failed to delete course.",
+      });
+      setIsDeleteDialogOpen(false);
+    },
+  });
+
+  const handleTogglePublish = () =>
+    togglePublishMutation.mutate(!course?.isPublished);
+  const handleDelete = () => deleteMutation.mutate(course._id);
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
@@ -72,78 +145,8 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  const { data, isPending, error } = useQuery<ApiResponse<ICourse>>({
-    queryKey: ["course", courseId],
-    queryFn: () => courseApi.getCourseById(courseId),
-  });
-
-  const course = data?.data as ICourse;
-
-  const togglePublishMutation = useMutation({
-    mutationFn: (isPublished: boolean) => {
-      const formData = new FormData();
-      formData.append("isPublished", isPublished.toString());
-      return courseApi.updateCourse(course._id, formData);
-    },
-    onSuccess: (data) => {
-      const { course } = data.data;
-      const action = course.isPublished ? "published" : "unpublished";
-      toast.success(`Exam ${action} successfully`, {
-        description: `${course.title} has been ${action}.`,
-      });
-
-      queryClient.invalidateQueries({ queryKey: ["course", course._id] });
-      queryClient.invalidateQueries({ queryKey: ["courses"] });
-    },
-    onError: (error: AxiosError<ApiErrorResponse>) => {
-      const errorMessage =
-        error.response?.data?.message ||
-        "Failed to update course status. Please try again.";
-      toast.error("Update Failed", {
-        description: errorMessage,
-      });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => courseApi.deleteCourse(id),
-    onSuccess: (data) => {
-      toast.success("Success!", {
-        description: data.message,
-      });
-
-      queryClient.invalidateQueries({ queryKey: ["courses"] });
-      setIsDeleteDialogOpen(false);
-    },
-    onError: (error: AxiosError<ApiErrorResponse>) => {
-      const errorMessage =
-        error.response?.data?.message ||
-        "Failed to delete course. Please try again.";
-      toast.error("Delete Failed", {
-        description: errorMessage,
-      });
-      setIsDeleteDialogOpen(false);
-    },
-  });
-
-  const handleDelete = () => {
-    deleteMutation.mutate(course._id);
-  };
-
-  const handleTogglePublish = () => {
-    const currentStatus = course.isPublished;
-    togglePublishMutation.mutate(!currentStatus);
-  };
-
-  const isPublishing = togglePublishMutation.isPending;
-
-  if (isPending) {
-    return <CourseDetailsSkeleton />;
-  }
-
-  if (error || !course) {
+  if (isCourseLoading) return <CourseDetailsSkeleton />;
+  if (courseError || !course)
     return (
       <div className="">
         <EmptyState
@@ -159,8 +162,8 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
         />
       </div>
     );
-  }
 
+  const isPublishing = togglePublishMutation.isPending;
   const isDeleting = deleteMutation.isPending;
 
   return (
@@ -292,20 +295,7 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
                     {course.isPublished ? "Published" : "Draft"}
                   </Badge>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    Students
-                  </span>
-                  <span className="font-medium">
-                    {course.enrolledStudents?.length || 0}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Lessons</span>
-                  <span className="font-medium">
-                    {course.lessons?.length || 0}
-                  </span>
-                </div>
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
                     Duration
@@ -358,36 +348,21 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
               onValueChange={handleTabChange}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="lessons">Lessons</TabsTrigger>
-                <TabsTrigger value="exams">Exams</TabsTrigger>
-                <TabsTrigger value="students">Students</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="builder">Course Builder</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="mt-6">
                 <CourseDetailsOverviewTab course={course} />
               </TabsContent>
 
-              <TabsContent value="lessons" className="mt-6">
-                <LessonsTab
-                  lessons={course.lessons || []}
+              <TabsContent value="builder" className="mt-6">
+                <CourseBuilderTab
+                  modules={modules}
+                  lessons={modules.flatMap((m) => m.lessons || [])}
                   courseId={course._id}
-                />
-              </TabsContent>
-
-              <TabsContent value="exams" className="mt-6">
-                <ExamsTab courseId={course._id} />
-              </TabsContent>
-
-              <TabsContent value="students" className="mt-6">
-                <EnrolledStudentsTab students={course.enrolledStudents || []} />
-              </TabsContent>
-
-              <TabsContent value="analytics" className="mt-6">
-                <CourseDetailsAnalyticsTab
-                  totalStudents={course.enrolledStudents?.length || 0}
+                  loading={isModulesLoading}
                 />
               </TabsContent>
             </Tabs>
@@ -439,4 +414,4 @@ const CourseDetails = ({ courseId }: { courseId: string }) => {
   );
 };
 
-export default CourseDetails;
+export default CourseBuilderPage;

@@ -102,32 +102,10 @@ const navGroups: INavGroup[] = [
         roles: ["super-admin", "admin", "instructor"],
         icon: BookOpen,
       },
-      {
-        title: "Enrollments",
-        url: "/dashboard/courses/enrollments",
-        roles: ["super-admin", "admin", "instructor"],
-        icon: Award,
-      },
+    
     ],
   },
-  {
-    title: "Exam System",
-    roles: ["super-admin", "admin", "instructor"],
-    items: [
-      {
-        title: "All Exams",
-        url: "/dashboard/exams",
-        roles: ["super-admin", "admin", "instructor"],
-        icon: FileCheck,
-      },
-      {
-        title: "Submissions",
-        url: "/dashboard/exams/submissions",
-        roles: ["super-admin", "admin", "instructor"],
-        icon: TrendingUp,
-      },
-    ],
-  },
+  
   {
     title: "Sermon Management",
     roles: ["super-admin", "admin", "pastor"],
@@ -216,12 +194,12 @@ const commonNav: ISidebarMenu[] = [
     roles: ["super-admin", "admin", "instructor", "pastor"],
     icon: User,
   },
-  {
-    title: "Notifications",
-    url: "/dashboard/notifications",
-    roles: ["super-admin", "admin", "instructor", "pastor"],
-    icon: Bell,
-  },
+  // {
+  //   title: "Notifications",
+  //   url: "/dashboard/notifications",
+  //   roles: ["super-admin", "admin", "instructor", "pastor"],
+  //   icon: Bell,
+  // },
   {
     title: "Settings",
     url: "/dashboard/settings",
