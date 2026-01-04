@@ -84,7 +84,7 @@ const LoginForm = () => {
         description: `Welcome back, ${user.firstName}! Redirecting to your dashboard...`,
       });
 
-      router.push(redirectUrl || "/dashboard");
+      window.location.href = redirectUrl || "/dashboard";
     },
     onError: (error: AxiosError<ApiErrorResponse>) => {
       // You can handle specific error messages here
