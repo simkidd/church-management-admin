@@ -67,6 +67,7 @@ const eventSchema = z
     requiresRegistration: z.boolean(),
     maxAttendees: z.number().min(1).optional().nullable(),
     isPublished: z.boolean(),
+    isFeatured: z.boolean(),
   })
   .refine((data) => data.endDate >= data.startDate, {
     message: "End date cannot be before start date",
@@ -120,7 +121,9 @@ export function EventForm({ event, isEdit = false }: EventFormProps) {
       toast.success("Success", {
         description: data.message || "Event created successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["allEvents"] });
+      queryClient.invalidateQueries({ queryKey: ["infinite-events"] });
+      queryClient.invalidateQueries({ queryKey: ["weeklyHighlights"] });
       router.push("/dashboard/events");
     },
     onError: (error: AxiosError<ApiErrorResponse>) => {
@@ -182,6 +185,7 @@ export function EventForm({ event, isEdit = false }: EventFormProps) {
       requiresRegistration: false,
       maxAttendees: null,
       isPublished: true,
+      isFeatured: false,
     },
   });
 
@@ -703,6 +707,27 @@ export function EventForm({ event, isEdit = false }: EventFormProps) {
                           <FormLabel>Published</FormLabel>
                           <FormDescription>
                             Make this event publicly visible
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="isFeatured"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel>Featured</FormLabel>
+                          <FormDescription>
+                            Make this event show as featured
                           </FormDescription>
                         </div>
                         <FormControl>

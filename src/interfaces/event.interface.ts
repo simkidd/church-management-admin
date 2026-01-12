@@ -13,6 +13,7 @@ export interface IEvent {
   registeredUsers: IUser[];
   image?: IMedia | null;
   isPublished: boolean;
+  isFeatured: boolean;
   createdBy: IUser;
   isMultiDay: boolean;
   createdAt: string;
