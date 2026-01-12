@@ -64,6 +64,7 @@ import {
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import { getPaginationRange } from "@/components/shared/DataTable";
+import Link from "next/link";
 
 export function EventList() {
   const router = useRouter();
@@ -295,7 +296,7 @@ export function EventList() {
                   </Button>
                 ) : (
                   <Button asChild>
-                    <a href="/dashboard/events/create">Create Event</a>
+                    <Link href="/dashboard/events/create">Create Event</Link>
                   </Button>
                 )
               }

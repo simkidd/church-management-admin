@@ -256,6 +256,7 @@ export function EventDetail({ id }: EventDetailProps) {
                 <Badge variant={event.isPublished ? "default" : "secondary"}>
                   {event.isPublished ? "Published" : "Draft"}
                 </Badge>
+                {event.isFeatured && <Badge variant="default">Featured</Badge>}
                 <Badge
                   variant={event.requiresRegistration ? "default" : "secondary"}
                 >
