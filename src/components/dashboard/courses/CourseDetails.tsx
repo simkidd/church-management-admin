@@ -121,7 +121,7 @@ const CourseBuilderPage = ({ courseId }: { courseId: string }) => {
       return courseApi.updateCourse(course?._id as string, formData);
     },
     onSuccess: (data) => {
-      const action = data.data.isPublished ? "published" : "unpublished";
+      const action = data.data.course.isPublished ? "published" : "unpublished";
       toast.success(`Course ${action} successfully`);
       queryClient.invalidateQueries({ queryKey: ["course", course?._id] });
       queryClient.invalidateQueries({ queryKey: ["courses"] });

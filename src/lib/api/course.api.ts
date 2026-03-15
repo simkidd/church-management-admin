@@ -37,7 +37,7 @@ export const courseApi = {
   updateCourse: async (
     id: string,
     data: FormData,
-  ): Promise<ApiResponse<ICourse>> => {
+  ): Promise<ApiResponse<{ course: ICourse }>> => {
     const response = await api.put(`/courses/${id}/update`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
