@@ -1,3 +1,4 @@
+// components/lesson-form.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -14,7 +15,6 @@ import {
   Headphones,
   Upload,
   X,
-  Eye,
   Clock,
 } from "lucide-react";
 
@@ -37,18 +37,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApiErrorResponse } from "@/interfaces/response.interface";
 import { lessonApi } from "@/lib/api/lesson.api";
 import { ILesson } from "@/interfaces/lesson.interface";
 import { Accept, useDropzone } from "react-dropzone";
+import { RichTextEditor } from "@/components/common/RichTextEditor";
 
 const lessonFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
@@ -96,7 +89,6 @@ export const LessonForm: React.FC<LessonFormProps> = ({
   isEdit = false,
 }) => {
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("content");
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
@@ -123,7 +115,6 @@ export const LessonForm: React.FC<LessonFormProps> = ({
 
     form.reset(getFormDefaultValues(isEdit ? initialValues : undefined));
     setMediaFile(null);
-    setActiveTab("content");
   }, [open, isEdit, initialValues, form]);
 
   useEffect(() => {
@@ -240,7 +231,6 @@ export const LessonForm: React.FC<LessonFormProps> = ({
   const handleClose = () => {
     form.reset();
     setMediaFile(null);
-    setActiveTab("content");
     setOpen(false);
   };
 
@@ -263,301 +253,258 @@ export const LessonForm: React.FC<LessonFormProps> = ({
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="content">Content</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="content" className=" mt-4">
-              <FieldGroup className="">
-                {/* Title */}
-                <Controller
-                  name="title"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Lesson Title *</FieldLabel>
-                      <Input
-                        {...field}
-                        placeholder="e.g., Introduction to Components"
-                        disabled={isLoading}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                {/* Description */}
-                <Controller
-                  name="description"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Description</FieldLabel>
-                      <Textarea
-                        {...field}
-                        placeholder="Brief description of this lesson..."
-                        disabled={isLoading}
-                        rows={2}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                {/* Lesson Type */}
-                <Controller
-                  name="type"
-                  control={form.control}
-                  render={({ field }) => (
-                    <Field>
-                      <FieldLabel>Lesson Type</FieldLabel>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { value: "video", icon: Video, label: "Video" },
-                          {
-                            value: "article",
-                            icon: FileText,
-                            label: "Article",
-                          },
-                          { value: "audio", icon: Headphones, label: "Audio" },
-                        ].map((type) => (
-                          <button
-                            key={type.value}
-                            type="button"
-                            onClick={() => field.onChange(type.value)}
-                            className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
-                              field.value === type.value
-                                ? "border-primary bg-primary/5"
-                                : "border-muted hover:border-muted-foreground/25"
-                            }`}
-                          >
-                            <type.icon
-                              className={`h-6 w-6 ${
-                                field.value === type.value
-                                  ? "text-primary"
-                                  : "text-muted-foreground"
-                              }`}
-                            />
-                            <span className="text-sm font-medium">
-                              {type.label}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </Field>
-                  )}
-                />
-
-                {/* Content based on type */}
-                {lessonType === "video" && (
-                  <Field>
-                    <FieldLabel>Video Content</FieldLabel>
-
-                    {previewUrl && mediaFile ? (
-                      <div className="relative aspect-video rounded-lg border bg-muted flex items-center justify-center overflow-hidden">
-                        <video
-                          src={previewUrl}
-                          className="w-full h-full rounded-lg"
-                          controls
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-2 right-2"
-                          onClick={() => setMediaFile(null)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : existingVideoUrl ? (
-                      <div className="relative aspect-video rounded-lg border bg-muted overflow-hidden">
-                        <video
-                          src={existingVideoUrl}
-                          className="w-full h-full rounded-lg"
-                          controls
-                        />
-                        <div
-                          {...getRootProps()}
-                          className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity rounded-lg cursor-pointer"
-                        >
-                          <input {...getInputProps()} />
-                          <p className="text-white font-medium">
-                            Click to replace video
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        {...getRootProps()}
-                        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                          isDragActive
-                            ? "border-primary bg-primary/5"
-                            : "border-muted"
-                        }`}
-                      >
-                        <input {...getInputProps()} />
-                        <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
-                          {isDragActive
-                            ? "Drop video here..."
-                            : "Drag & drop video or click to upload"}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          MP4, MOV, AVI, MKV, WebM up to 500MB
-                        </p>
-                      </div>
-                    )}
-                  </Field>
-                )}
-
-                {lessonType === "article" && (
-                  <Controller
-                    name="content.textContent"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Article Content</FieldLabel>
-                        <Textarea
-                          {...field}
-                          placeholder="Write your article content here... (HTML supported)"
-                          disabled={isLoading}
-                          rows={10}
-                          className="font-mono text-sm"
-                        />
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
+          <FieldGroup className="mt-4 gap-4">
+            {/* Title */}
+            <Controller
+              name="title"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Lesson Title *</FieldLabel>
+                  <Input
+                    {...field}
+                    placeholder="e.g., Introduction to Components"
+                    disabled={isLoading}
                   />
-                )}
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
-                {lessonType === "audio" && (
-                  <Field>
-                    <FieldLabel>Audio Content</FieldLabel>
+            {/* Description */}
+            <Controller
+              name="description"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Description</FieldLabel>
+                  <Textarea
+                    {...field}
+                    placeholder="Brief description of this lesson..."
+                    disabled={isLoading}
+                    rows={2}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
-                    {previewUrl && mediaFile ? (
-                      <div className="relative rounded-lg border bg-muted p-4">
-                        <audio src={previewUrl} className="w-full" controls />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-2 right-2"
-                          onClick={() => setMediaFile(null)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : existingAudioUrl ? (
-                      <div className="relative rounded-lg border bg-muted p-4">
-                        <audio
-                          src={existingAudioUrl}
-                          className="w-full"
-                          controls
-                        />
-                        <div
-                          {...getRootProps()}
-                          className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity rounded-lg cursor-pointer"
-                        >
-                          <input {...getInputProps()} />
-                          <p className="text-white font-medium">
-                            Click to replace audio
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        {...getRootProps()}
-                        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                          isDragActive
+            {/* Lesson Type */}
+            <Controller
+              name="type"
+              control={form.control}
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>Lesson Type</FieldLabel>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { value: "video", icon: Video, label: "Video" },
+                      {
+                        value: "article",
+                        icon: FileText,
+                        label: "Article",
+                      },
+                      { value: "audio", icon: Headphones, label: "Audio" },
+                    ].map((type) => (
+                      <button
+                        key={type.value}
+                        type="button"
+                        onClick={() => field.onChange(type.value)}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                          field.value === type.value
                             ? "border-primary bg-primary/5"
-                            : "border-muted"
+                            : "border-muted hover:border-muted-foreground/25"
                         }`}
                       >
-                        <input {...getInputProps()} />
-                        <Headphones className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
-                          {isDragActive
-                            ? "Drop audio here..."
-                            : "Upload audio file"}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          MP3, WAV, M4A, AAC, OGG, WebM up to 500MB
-                        </p>
-                      </div>
+                        <type.icon
+                          className={`h-6 w-6 ${
+                            field.value === type.value
+                              ? "text-primary"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                        <span className="text-sm font-medium">
+                          {type.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+              )}
+            />
+
+            {/* Content based on type */}
+            {lessonType === "video" && (
+              <Field>
+                <FieldLabel>Video Content</FieldLabel>
+
+                {previewUrl && mediaFile ? (
+                  <div className="relative aspect-video rounded-lg border bg-muted flex items-center justify-center overflow-hidden">
+                    <video
+                      src={previewUrl}
+                      className="w-full h-full rounded-lg"
+                      controls
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={() => setMediaFile(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : existingVideoUrl ? (
+                  <div className="relative aspect-video rounded-lg border bg-muted overflow-hidden">
+                    <video
+                      src={existingVideoUrl}
+                      className="w-full h-full rounded-lg"
+                      controls
+                    />
+                    <div
+                      {...getRootProps()}
+                      className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity rounded-lg cursor-pointer"
+                    >
+                      <input {...getInputProps()} />
+                      <p className="text-white font-medium">
+                        Click to replace video
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    {...getRootProps()}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                      isDragActive
+                        ? "border-primary bg-primary/5"
+                        : "border-muted"
+                    }`}
+                  >
+                    <input {...getInputProps()} />
+                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      {isDragActive
+                        ? "Drop video here..."
+                        : "Drag & drop video or click to upload"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      MP4, MOV, AVI, MKV, WebM up to 500MB
+                    </p>
+                  </div>
+                )}
+              </Field>
+            )}
+
+            {lessonType === "article" && (
+              <Controller
+                name="content.textContent"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Article Content</FieldLabel>
+                    <RichTextEditor
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="Write your article content here..."
+                      disabled={isLoading}
+                      minHeight="300px"
+                      maxHeight="500px"
+                      className="w-full"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
-              </FieldGroup>
-            </TabsContent>
+              />
+            )}
 
-            <TabsContent value="settings" className=" mt-4">
-              <FieldGroup className="">
-                {/* Preview */}
-                <Controller
-                  name="isPreview"
-                  control={form.control}
-                  render={({ field }) => (
-                    <div className="flex items-start gap-3 p-4 border rounded-lg bg-muted/30">
-                      <Checkbox
-                        id="isPreview"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isLoading}
-                      />
-                      <div>
-                        <label
-                          htmlFor="isPreview"
-                          className="font-medium cursor-pointer flex items-center gap-2"
-                        >
-                          <Eye className="h-4 w-4" />
-                          Free Preview
-                        </label>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Allow non-enrolled users to view this lesson
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                />
+            {lessonType === "audio" && (
+              <Field>
+                <FieldLabel>Audio Content</FieldLabel>
 
-                {/* Published */}
-                <Controller
-                  name="isPublished"
-                  control={form.control}
-                  render={({ field }) => (
-                    <div className="flex items-start gap-3 p-4 border rounded-lg bg-muted/30">
-                      <Checkbox
-                        id="isPublished"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isLoading}
-                      />
-                      <div>
-                        <label
-                          htmlFor="isPublished"
-                          className="font-medium cursor-pointer"
-                        >
-                          Published
-                        </label>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Make this lesson visible to students
-                        </p>
-                      </div>
+                {previewUrl && mediaFile ? (
+                  <div className="relative rounded-lg border bg-muted p-4">
+                    <audio src={previewUrl} className="w-full" controls />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={() => setMediaFile(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : existingAudioUrl ? (
+                  <div className="relative rounded-lg border bg-muted p-4">
+                    <audio src={existingAudioUrl} className="w-full" controls />
+                    <div
+                      {...getRootProps()}
+                      className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity rounded-lg cursor-pointer"
+                    >
+                      <input {...getInputProps()} />
+                      <p className="text-white font-medium">
+                        Click to replace audio
+                      </p>
                     </div>
-                  )}
-                />
-              </FieldGroup>
-            </TabsContent>
-          </Tabs>
+                  </div>
+                ) : (
+                  <div
+                    {...getRootProps()}
+                    className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                      isDragActive
+                        ? "border-primary bg-primary/5"
+                        : "border-muted"
+                    }`}
+                  >
+                    <input {...getInputProps()} />
+                    <Headphones className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      {isDragActive
+                        ? "Drop audio here..."
+                        : "Upload audio file"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      MP3, WAV, M4A, AAC, OGG, WebM up to 500MB
+                    </p>
+                  </div>
+                )}
+              </Field>
+            )}
+
+            {/* Published */}
+            <Controller
+              name="isPublished"
+              control={form.control}
+              render={({ field }) => (
+                <div className="flex items-start gap-3 p-4 border rounded-lg bg-muted/30">
+                  <Checkbox
+                    id="isPublished"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                  <div>
+                    <label
+                      htmlFor="isPublished"
+                      className="font-medium cursor-pointer"
+                    >
+                      Published
+                    </label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Make this lesson visible to students
+                    </p>
+                  </div>
+                </div>
+              )}
+            />
+          </FieldGroup>
 
           <DialogFooter className="mt-6">
             <Button

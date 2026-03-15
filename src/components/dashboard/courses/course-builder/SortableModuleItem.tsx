@@ -224,7 +224,7 @@ export const SortableModuleItem = ({
                     <p className="text-sm">No lessons yet</p>
                     <LessonForm moduleId={module._id} courseId={courseId}>
                       <Button variant="outline" size="sm" className="mt-2">
-                        <Plus className="h-4 w-4 mr-1" />
+                        <Plus className="h-4 w-4" />
                         Add First Lesson
                       </Button>
                     </LessonForm>

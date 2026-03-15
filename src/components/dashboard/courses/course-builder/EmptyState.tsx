@@ -13,7 +13,7 @@ export const EmptyState = ({ courseId }: { courseId: string }) => (
     </p>
     <ModuleForm courseId={courseId}>
       <Button>
-        <Plus className="h-4 w-4 mr-2" />
+        <Plus className="h-4 w-4" />
         Create First Module
       </Button>
     </ModuleForm>

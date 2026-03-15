@@ -18,9 +18,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,39 +31,33 @@ import {
 import {
   ArrowLeft,
   BookOpen,
+  CalendarDays,
+  ClipboardList,
   Edit,
   Eye,
   EyeOff,
-  ImageIcon,
+  Files,
+  Layers3,
+  LayoutDashboard,
+  ListTodo,
   Loader2,
   MoreVertical,
-  Trash2,
-  GraduationCap,
-  ListTodo,
-  Lock,
-  Unlock,
-  Files,
-  LayoutDashboard,
-  ClipboardList,
-  Layers3,
-  Clock3,
-  CalendarDays,
+  Trash2
 } from "lucide-react";
 
+import { EmptyState } from "@/components/shared/EmptyState";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { IModuleWithState } from "@/interfaces/module.interface";
+import { IQuizSummary } from "@/interfaces/quiz.interface";
 import { ApiErrorResponse, ApiResponse } from "@/interfaces/response.interface";
 import { AxiosError } from "axios";
+import { format } from "date-fns";
+import Link from "next/link";
 import { CourseBuilderTab } from "./course-builder/CourseBuilderTab";
+import { CourseDetailsOverviewTab } from "./CourseDetailsOverviewTab";
 import { CourseDetailsSkeleton } from "./CourseDetailsSkeleton";
 import CourseForm from "./CourseForm";
-import { CourseDetailsOverviewTab } from "./CourseDetailsOverviewTab";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmptyState } from "@/components/shared/EmptyState";
-import Link from "next/link";
-import Image from "next/image";
-import { format } from "date-fns";
-import { IModuleWithState } from "@/interfaces/module.interface";
 import CourseLearningMaterialsTab from "./learning-materials/CourseLearningMaterialsTab";
-import { IQuizSummary } from "@/interfaces/quiz.interface";
 
 const CourseBuilderPage = ({ courseId }: { courseId: string }) => {
   const router = useRouter();
