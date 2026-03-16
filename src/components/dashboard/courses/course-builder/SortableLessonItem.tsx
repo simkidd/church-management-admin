@@ -121,167 +121,180 @@ export const SortableLessonItem = ({
         ref={setNodeRef}
         style={style}
         className={cn(
-          "group flex items-center gap-3 p-3 rounded-md bg-card border shadow-sm",
+          "flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 rounded-md bg-card border shadow-sm",
           isDragging && "opacity-50 shadow-md ring-2 ring-primary",
           !lesson.isPublished && "border-dashed opacity-75",
         )}
       >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              {...attributes}
-              {...listeners}
-              className="p-1 rounded hover:bg-muted cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <GripVertical className="h-4 w-4 text-muted-foreground" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Drag to reorder</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="p-2 rounded-md bg-muted cursor-default">
-              {getLessonIcon()}
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{getLessonTypeLabel()}</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-muted-foreground">
-              L{lessonIndex + 1}
-            </span>
-            <span className="font-medium text-sm truncate">{lesson.title}</span>
-
-            {lesson.isPreview && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge
-                    variant="secondary"
-                    className="text-[10px] px-1.5 py-0 cursor-default"
-                  >
-                    Preview
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Free preview available</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-
-            {!lesson.isPublished && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge
-                    variant="outline"
-                    className="text-[10px] px-1.5 py-0 cursor-default"
-                  >
-                    Draft
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Not published yet</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-
-            {lesson.quiz && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-3 w-3 text-amber-500 cursor-pointer" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Has quiz</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
-            <span className="capitalize">{lesson.type}</span>
-            {!!lesson.durationSeconds && (
-              <>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {formatDuration(lesson.durationSeconds)}
-                </span>
-              </>
-            )}
-            {lesson.quiz && (
-              <>
-                <span>•</span>
-                <span className="text-amber-600">Has Quiz</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {!lesson.quiz && (
-            <Tooltip>
-              <TooltipTrigger>
-                <QuizForm
-                  courseId={courseId}
-                  moduleId={moduleId}
-                  lessonId={lesson._id}
-                  scopeType="lesson"
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-7 p-0 text-amber-500"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                    </Button>
-                  }
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Add quiz</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
+        {/* Top row: Drag handle, Icon, Title, Badges, Actions */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Tooltip>
-            <TooltipTrigger>
-              <LessonForm
-                moduleId={moduleId}
-                courseId={courseId}
-                initialValues={lesson}
-                isEdit
+            <TooltipTrigger asChild>
+              <button
+                {...attributes}
+                {...listeners}
+                className="p-1 rounded hover:bg-muted cursor-grab active:cursor-grabbing touch-none shrink-0"
               >
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                  <Edit2 className="h-3.5 w-3.5" />
-                </Button>
-              </LessonForm>
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              </button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Edit lesson</p>
+              <p>Drag to reorder</p>
             </TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0 text-destructive"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <div className="p-2 rounded-md bg-muted cursor-default shrink-0">
+                {getLessonIcon()}
+              </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Delete lesson</p>
+              <p>{getLessonTypeLabel()}</p>
             </TooltipContent>
           </Tooltip>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span className="text-xs font-mono text-muted-foreground shrink-0">
+                L{lessonIndex + 1}
+              </span>
+              <span className="font-medium text-sm truncate">
+                {lesson.title}
+              </span>
+
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {lesson.isPreview && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] px-1.5 py-0 cursor-default"
+                      >
+                        Preview
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Free preview available</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+
+                {!lesson.isPublished && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] px-1.5 py-0 cursor-default"
+                      >
+                        Draft
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Not published yet</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+
+                {lesson.quiz && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3 w-3 text-amber-500 cursor-pointer" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Has quiz</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Actions - on mobile: below title, on desktop: right side */}
+          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 ml-auto">
+            {!lesson.quiz && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <QuizForm
+                    courseId={courseId}
+                    moduleId={moduleId}
+                    lessonId={lesson._id}
+                    scopeType="lesson"
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 sm:h-7 sm:w-7 p-0 text-amber-500"
+                      >
+                        <Plus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                      </Button>
+                    }
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Add quiz</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            <Tooltip>
+              <TooltipTrigger>
+                <LessonForm
+                  moduleId={moduleId}
+                  courseId={courseId}
+                  initialValues={lesson}
+                  isEdit
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 sm:h-7 sm:w-7 p-0"
+                  >
+                    <Edit2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                  </Button>
+                </LessonForm>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Edit lesson</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 sm:h-7 sm:w-7 p-0 text-destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Delete lesson</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        {/* Bottom row: Metadata (type, duration, quiz) - full width on mobile */}
+        <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground sm:pl-0 pl-9">
+          <span className="capitalize">{lesson.type}</span>
+          {!!lesson.durationSeconds && (
+            <>
+              <span className="hidden sm:inline">•</span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {formatDuration(lesson.durationSeconds)}
+              </span>
+            </>
+          )}
+          {lesson.quiz && (
+            <>
+              <span className="hidden sm:inline">•</span>
+              <span className="text-amber-600">Has Quiz</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -296,7 +309,7 @@ export const SortableLessonItem = ({
       )}
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Lesson?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -304,8 +317,11 @@ export const SortableLessonItem = ({
               {lesson.quiz ? " and its associated quiz" : ""}.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel
+              disabled={deleteMutation.isPending}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
@@ -314,7 +330,7 @@ export const SortableLessonItem = ({
                 deleteMutation.mutate();
               }}
               disabled={deleteMutation.isPending}
-              className="bg-destructive text-destructive-foreground"
+              className="bg-destructive text-destructive-foreground w-full sm:w-auto"
             >
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </AlertDialogAction>
