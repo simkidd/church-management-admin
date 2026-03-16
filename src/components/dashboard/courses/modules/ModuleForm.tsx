@@ -134,6 +134,7 @@ const ModuleForm: React.FC<ModuleFormProps> = ({
         onInteractOutside={(e) => {
           if (isLoading) e.preventDefault();
         }}
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -147,8 +148,8 @@ const ModuleForm: React.FC<ModuleFormProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FieldGroup className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <FieldGroup className="gap-4">
             {/* Title */}
             <Controller
               name="title"
@@ -195,7 +196,7 @@ const ModuleForm: React.FC<ModuleFormProps> = ({
               name="isPublished"
               control={form.control}
               render={({ field }) => (
-                <div className="flex items-start gap-3 p-3 border rounded-lg bg-muted/30">
+                <div className="flex items-start gap-3 p-3 border rounded-lg bg-muted/30 mt-2">
                   <Checkbox
                     id="isPublished"
                     checked={field.value}
@@ -218,7 +219,7 @@ const ModuleForm: React.FC<ModuleFormProps> = ({
             />
           </FieldGroup>
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-2 mt-4">
             <Button
               type="button"
               variant="outline"

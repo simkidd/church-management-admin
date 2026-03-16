@@ -436,7 +436,11 @@ export const QuizForm: React.FC<QuizFormProps> = ({
     >
       <DialogTrigger asChild>{trigger || children}</DialogTrigger>
 
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto"
+      >
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className={cn("p-2 rounded-lg", getScopeColor())}>
