@@ -19,7 +19,10 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { IModuleWithLessons, IModuleWithState } from "@/interfaces/module.interface";
+import {
+  IModuleWithLessons,
+  IModuleWithState,
+} from "@/interfaces/module.interface";
 import { ILessonWithQuiz } from "@/interfaces/lesson.interface";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +48,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SortableModuleItemProps {
   module: IModuleWithState;
@@ -89,28 +97,42 @@ export const SortableModuleItem = ({
         className={cn(
           "group rounded-lg border bg-card shadow-sm overflow-hidden",
           isDragging && "opacity-50 shadow-lg ring-2 ring-primary",
-          !module.isPublished && "border-dashed"
+          !module.isPublished && "border-dashed",
         )}
       >
         <div className="flex items-center gap-3 p-4 bg-card">
-          <button
-            {...attributes}
-            {...listeners}
-            className="p-1.5 rounded hover:bg-muted cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <GripVertical className="h-5 w-5 text-muted-foreground" />
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                {...attributes}
+                {...listeners}
+                className="p-1.5 rounded hover:bg-muted cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <GripVertical className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>Drag to reorder</p>
+            </TooltipContent>
+          </Tooltip>
 
-          <button
-            onClick={onToggle}
-            className="p-1.5 rounded hover:bg-muted transition-colors cursor-pointer"
-          >
-            {isExpanded ? (
-              <ChevronDown className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            )}
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={onToggle}
+                className="p-1.5 rounded hover:bg-muted transition-colors cursor-pointer"
+              >
+                {isExpanded ? (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>{isExpanded ? "Collapse module" : "Expand module"}</p>
+            </TooltipContent>
+          </Tooltip>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -133,43 +155,79 @@ export const SortableModuleItem = ({
           </div>
 
           <div className="hidden sm:flex items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <PlayCircle className="h-4 w-4" />
-              {module.lessons?.length || 0}
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex items-center gap-1">
+                  <PlayCircle className="h-4 w-4" />
+                  {module.lessons?.length || 0}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{module.lessons?.length || 0} lessons</p>
+              </TooltipContent>
+            </Tooltip>
+
             {module.quiz && (
-              <span className="flex items-center gap-1">
-                <HelpCircle className="h-4 w-4 text-amber-500" />
-                Quiz
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="flex items-center gap-1">
+                    <HelpCircle className="h-4 w-4 text-amber-500" />
+                    Quiz
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Module has a quiz</p>
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
 
           <div className="flex items-center gap-1">
-            <LessonForm moduleId={module._id} courseId={courseId}>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </LessonForm>
+            <Tooltip>
+              <TooltipTrigger>
+                <LessonForm moduleId={module._id} courseId={courseId}>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </LessonForm>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>Add lesson</p>
+              </TooltipContent>
+            </Tooltip>
 
             {!module.quiz && (
-              <QuizForm
-                courseId={courseId}
-                moduleId={module._id}
-                scopeType="module"
-                trigger={
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <HelpCircle className="h-4 w-4 text-amber-500" />
-                  </Button>
-                }
-              />
+              <Tooltip>
+                <TooltipTrigger>
+                  <QuizForm
+                    courseId={courseId}
+                    moduleId={module._id}
+                    scopeType="module"
+                    trigger={
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <HelpCircle className="h-4 w-4 text-amber-500" />
+                      </Button>
+                    }
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p>Add quiz</p>
+                </TooltipContent>
+              </Tooltip>
             )}
 
-            <ModuleForm courseId={courseId} initialValues={module} isEdit>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Edit2 className="h-4 w-4" />
-              </Button>
-            </ModuleForm>
+            <Tooltip>
+              <TooltipTrigger >
+                <ModuleForm courseId={courseId} initialValues={module} isEdit>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                </ModuleForm>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>Edit module</p>
+              </TooltipContent>
+            </Tooltip>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

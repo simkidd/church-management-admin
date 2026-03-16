@@ -18,6 +18,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ModuleQuizCardProps {
   quiz: IQuizSummary;
@@ -45,7 +50,14 @@ export const ModuleQuizCard = ({
   return (
     <>
       <div className="flex items-center gap-3 p-3 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
-        <HelpCircle className="h-5 w-5 text-amber-600" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <HelpCircle className="h-5 w-5 text-amber-600 cursor-pointer" />
+          </TooltipTrigger>
+          <TooltipContent >
+            <p>Module assessment quiz</p>
+          </TooltipContent>
+        </Tooltip>
 
         <div className="flex-1">
           <p className="font-medium text-sm text-amber-900 dark:text-amber-100">
@@ -56,31 +68,55 @@ export const ModuleQuizCard = ({
           </p>
         </div>
 
-        <Badge variant="outline" className="text-xs border-amber-300">
-          Pass: {quiz.passingScore}%
-        </Badge>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge
+              variant="outline"
+              className="text-xs border-amber-300 cursor-default"
+            >
+              Pass: {quiz.passingScore}%
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent >
+            <p>Passing score required</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <QuizForm
-          courseId={courseId}
-          moduleId={moduleId}
-          scopeType="module"
-          initialValues={quiz}
-          isEdit
-          trigger={
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-              <Edit2 className="h-3.5 w-3.5" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <QuizForm
+              courseId={courseId}
+              moduleId={moduleId}
+              scopeType="module"
+              initialValues={quiz}
+              isEdit
+              trigger={
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <Edit2 className="h-3.5 w-3.5" />
+                </Button>
+              }
+            />
+          </TooltipTrigger>
+          <TooltipContent >
+            <p>Edit quiz</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-destructive"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
-          }
-        />
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 w-7 p-0 text-destructive"
-          onClick={() => setShowDeleteDialog(true)}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+          </TooltipTrigger>
+          <TooltipContent >
+            <p>Delete quiz</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -105,4 +141,4 @@ export const ModuleQuizCard = ({
       </AlertDialog>
     </>
   );
-}
+};

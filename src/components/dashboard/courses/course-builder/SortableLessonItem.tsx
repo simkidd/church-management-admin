@@ -37,6 +37,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import LessonQuizCard from "./LessonQuizCard";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SortableLessonItemProps {
   lesson: ILessonWithState;
@@ -90,6 +95,19 @@ export const SortableLessonItem = ({
     }
   };
 
+  const getLessonTypeLabel = () => {
+    switch (lesson.type) {
+      case "video":
+        return "Video lesson";
+      case "audio":
+        return "Audio lesson";
+      case "article":
+        return "Article lesson";
+      default:
+        return "Lesson";
+    }
+  };
+
   return (
     <>
       <div
@@ -101,15 +119,31 @@ export const SortableLessonItem = ({
           !lesson.isPublished && "border-dashed opacity-75",
         )}
       >
-        <button
-          {...attributes}
-          {...listeners}
-          className="p-1 rounded hover:bg-muted cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              {...attributes}
+              {...listeners}
+              className="p-1 rounded hover:bg-muted cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <GripVertical className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent >
+            <p>Drag to reorder</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <div className="p-2 rounded-md bg-muted">{getLessonIcon()}</div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="p-2 rounded-md bg-muted cursor-default">
+              {getLessonIcon()}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent >
+            <p>{getLessonTypeLabel()}</p>
+          </TooltipContent>
+        </Tooltip>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -119,18 +153,47 @@ export const SortableLessonItem = ({
             <span className="font-medium text-sm truncate">{lesson.title}</span>
 
             {lesson.isPreview && (
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                Preview
-              </Badge>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] px-1.5 py-0 cursor-default"
+                  >
+                    Preview
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent >
+                  <p>Free preview available</p>
+                </TooltipContent>
+              </Tooltip>
             )}
 
             {!lesson.isPublished && (
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                Draft
-              </Badge>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] px-1.5 py-0 cursor-default"
+                  >
+                    Draft
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent >
+                  <p>Not published yet</p>
+                </TooltipContent>
+              </Tooltip>
             )}
 
-            {lesson.quiz && <HelpCircle className="h-3 w-3 text-amber-500" />}
+            {lesson.quiz && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-3 w-3 text-amber-500 cursor-pointer" />
+                </TooltipTrigger>
+                <TooltipContent >
+                  <p>Has quiz</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
 
           <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
@@ -155,42 +218,63 @@ export const SortableLessonItem = ({
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {!lesson.quiz && (
-            <QuizForm
-              courseId={courseId}
-              moduleId={moduleId}
-              lessonId={lesson._id}
-              scopeType="lesson"
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 text-amber-500"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                </Button>
-              }
-            />
+            <Tooltip>
+              <TooltipTrigger>
+                <QuizForm
+                  courseId={courseId}
+                  moduleId={moduleId}
+                  lessonId={lesson._id}
+                  scopeType="lesson"
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 text-amber-500"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                    </Button>
+                  }
+                />
+              </TooltipTrigger>
+              <TooltipContent >
+                <p>Add quiz</p>
+              </TooltipContent>
+            </Tooltip>
           )}
 
-          <LessonForm
-            moduleId={moduleId}
-            courseId={courseId}
-            initialValues={lesson}
-            isEdit
-          >
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-              <Edit2 className="h-3.5 w-3.5" />
-            </Button>
-          </LessonForm>
+          <Tooltip>
+            <TooltipTrigger>
+              <LessonForm
+                moduleId={moduleId}
+                courseId={courseId}
+                initialValues={lesson}
+                isEdit
+              >
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <Edit2 className="h-3.5 w-3.5" />
+                </Button>
+              </LessonForm>
+            </TooltipTrigger>
+            <TooltipContent >
+              <p>Edit lesson</p>
+            </TooltipContent>
+          </Tooltip>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 text-destructive"
-            onClick={() => setShowDeleteDialog(true)}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 text-destructive"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent >
+              <p>Delete lesson</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
 

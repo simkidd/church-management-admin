@@ -18,6 +18,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface LessonQuizCardProps {
   quiz: IQuizSummary;
@@ -48,7 +53,14 @@ const LessonQuizCard = ({
   return (
     <>
       <div className="ml-8 flex items-center gap-2 p-2 rounded-md bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/50">
-        <HelpCircle className="h-4 w-4 text-amber-500" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <HelpCircle className="h-4 w-4 text-amber-500 cursor-pointer" />
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>Lesson assessment quiz</p>
+          </TooltipContent>
+        </Tooltip>
 
         <div className="flex-1">
           <p className="text-sm text-amber-900 dark:text-amber-100">
@@ -61,32 +73,56 @@ const LessonQuizCard = ({
           </p>
         </div>
 
-        <Badge variant="outline" className="text-xs border-amber-300">
-          Pass: {quiz.passingScore}%
-        </Badge>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge
+              variant="outline"
+              className="text-xs border-amber-300 cursor-default"
+            >
+              Pass: {quiz.passingScore}%
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Passing score required</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <QuizForm
-          courseId={courseId}
-          moduleId={moduleId}
-          lessonId={lesson._id}
-          scopeType="lesson"
-          initialValues={quiz}
-          isEdit
-          trigger={
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-              <Edit2 className="h-3 w-3" />
+        <Tooltip>
+          <TooltipTrigger >
+            <QuizForm
+              courseId={courseId}
+              moduleId={moduleId}
+              lessonId={lesson._id}
+              scopeType="lesson"
+              initialValues={quiz}
+              isEdit
+              trigger={
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <Edit2 className="h-3 w-3" />
+                </Button>
+              }
+            />
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>Edit quiz</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-destructive"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
-          }
-        />
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 w-7 p-0 text-destructive"
-          onClick={() => setShowDeleteDialog(true)}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>Delete quiz</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
