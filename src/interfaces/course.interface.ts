@@ -4,24 +4,44 @@ export interface ICourse {
   _id: string;
   title: string;
   description: string;
-  instructor?: IUser;
-  thumbnail?: {
-    url: string;
-    publicId: string;
-  };
+  instructor: IUser;
+  thumbnail: IMedia;
+  introVideo: IMedia;
+  duration: string;
   isPublished: boolean;
   isFeatured: boolean;
-  duration: string;
-  category?: string;
-
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
+  createdAt: string;
+  updatedAt: string;
+  progressionMode: "free" | "sequential";
+  learningObjectives: string[];
 }
 
+export interface ICourseEnrol {
+  isEnrolled: boolean;
+  status: "active" | "completed" | "cancelled" | null;
+}
+
+export interface IMedia {
+  url: string;
+  publicId: string;
+}
 export interface ListCourseParams {
   page?: number;
   limit?: number;
   search?: string;
   sortOrder?: "asc" | "desc";
+  sortBy?: "createdAt" | "enrolledCount" | "rating" | "title";
   isPublished?: boolean;
+  isFeatured?: boolean;
+}
+
+export interface ICourseEnrollment {
+  _id: string;
+  user: string;
+  course: string;
+  enrolledAt: string;
+  completedAt: string | null;
+  status: "active" | "completed" | "cancelled" | null;
+  progressPercentage: number;
+  certificateIssued: boolean;
 }

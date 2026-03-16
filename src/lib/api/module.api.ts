@@ -10,14 +10,14 @@ import { IModule } from "@/interfaces/module.interface";
 export interface CreateModulePayload {
   course: string;
   title: string;
-  order: number;
-  quiz?: string;
+  description?: string;
+  isPublished: boolean;
 }
 
 export interface UpdateModulePayload {
   title?: string;
-  order?: number;
-  quiz?: string;
+  description?: string;
+  isPublished: boolean;
 }
 
 /* ======================
@@ -27,7 +27,7 @@ export interface UpdateModulePayload {
 export const moduleApi = {
   // Create module
   createModule: async (
-    payload: CreateModulePayload
+    payload: CreateModulePayload,
   ): Promise<ApiResponse<IModule>> => {
     const response = await api.post("/modules/create", payload);
     return response.data;
@@ -36,24 +36,24 @@ export const moduleApi = {
   // Update module
   updateModule: async (
     id: string,
-    payload: UpdateModulePayload
+    payload: UpdateModulePayload,
   ): Promise<ApiResponse<IModule>> => {
     const response = await api.put(`/modules/${id}/update`, payload);
     return response.data;
   },
 
   // reorder module
-  reorderModule: async (payload: {
+  reorderModules: async (payload: {
     courseId: string;
     modules: { id: string; order: number }[];
-  }): Promise<ApiResponse<{message: string}>> => {
-    const response = await api.put(`/modules/reorder`, payload);
+  }): Promise<ApiResponse<{ message: string }>> => {
+    const response = await api.patch(`/modules/reorder`, payload);
     return response.data;
   },
 
   // Delete module
   deleteModule: async (
-    id: string
+    id: string,
   ): Promise<ApiResponse<{ message: string }>> => {
     const response = await api.delete(`/modules/${id}/delete`);
     return response.data;
