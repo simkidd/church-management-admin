@@ -1,8 +1,7 @@
 import CourseForm from "@/components/dashboard/courses/CourseForm";
-import { CourseGrid } from "@/components/dashboard/courses/CourseGrid";
+import { CourseManagement } from "@/components/dashboard/courses/CourseManagement";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import Link from "next/link";
 
 export default function CoursesPage() {
   return (
@@ -25,7 +24,7 @@ export default function CoursesPage() {
         </CourseForm>
       </div>
 
-      <CourseGrid />
+      <CourseManagement />
     </div>
   );
 }

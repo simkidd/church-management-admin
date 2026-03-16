@@ -60,7 +60,6 @@ export default function LessonCard({
         <LessonForm
           moduleId={moduleId}
           courseId={courseId}
-          lessonId={lesson._id}
           initialValues={lesson}
         >
           <Button size="sm" variant="outline">

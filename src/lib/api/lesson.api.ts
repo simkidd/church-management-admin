@@ -5,17 +5,24 @@ import { ILesson } from "@/interfaces/lesson.interface";
 
 export const lessonApi = {
   // Create lesson
-  create: async (payload: FormData): Promise<ApiResponse<ILesson>> => {
-    const response = await api.post("/lessons/create", payload, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+  create: async (
+    moduleId: string,
+    payload: FormData,
+  ): Promise<ApiResponse<ILesson>> => {
+    const response = await api.post(
+      "/lessons/create",
+      { ...Object.fromEntries(payload), module: moduleId },
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      },
+    );
     return response.data;
   },
 
   // Update lesson
   update: async (
     id: string,
-    payload: FormData
+    payload: FormData,
   ): Promise<ApiResponse<ILesson>> => {
     const response = await api.put(`/lessons/${id}/update`, payload, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -31,7 +38,7 @@ export const lessonApi = {
   },
 
   // reorder lesson
-  reorderLesson: async (payload: {
+  reorderLessons: async (payload: {
     moduleId: string;
     lessons: { id: string; order: number }[];
   }): Promise<ApiResponse<{ message: string }>> => {
