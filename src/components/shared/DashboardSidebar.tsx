@@ -250,7 +250,7 @@ export function DashboardSidebar() {
   if (!hasHydrated) {
     return (
       <Sidebar collapsible="icon" className="border-r">
-        <SidebarHeader className="px-2 py-2 border-b min-h-16 flex items-center justify-center">
+        <SidebarHeader className="px-2 py-2 border-b min-h-16 ">
           <div className="flex items-center py-1">
             <Link href="/" className="flex items-center gap-2 font-medium">
               <Logo className="h-8" />
@@ -285,7 +285,7 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="px-2 py-2 border-b min-h-16 flex items-center justify-center">
+      <SidebarHeader className="px-2 py-2 border-b min-h-16 ">
         <div className="flex items-center py-1">
           <Link
             href="/"

@@ -23,6 +23,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ApiErrorResponse } from "@/interfaces/response.interface";
+import { AxiosError } from "axios";
 
 interface LessonQuizCardProps {
   quiz: IQuizSummary;
@@ -48,6 +50,11 @@ const LessonQuizCard = ({
       toast.success("Module quiz deleted");
       queryClient.invalidateQueries({ queryKey: ["course-modules", courseId] });
       setShowDeleteDialog(false);
+    },
+    onError: (error: AxiosError<ApiErrorResponse>) => {
+      toast.error("Failed to delete lesson quiz", {
+        description: error.response?.data?.message,
+      });
     },
   });
   return (
@@ -88,7 +95,7 @@ const LessonQuizCard = ({
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger >
+          <TooltipTrigger>
             <QuizForm
               courseId={courseId}
               moduleId={moduleId}
@@ -136,7 +143,10 @@ const LessonQuizCard = ({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteMutation.mutate()}
+              onClick={(e) => {
+                e.preventDefault();
+                deleteMutation.mutate();
+              }}
               disabled={deleteMutation.isPending}
               className="bg-destructive text-destructive-foreground"
             >

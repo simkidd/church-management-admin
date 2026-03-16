@@ -242,7 +242,11 @@ export const LessonForm: React.FC<LessonFormProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto"
+      >
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit Lesson" : "Add New Lesson"}</DialogTitle>
           <DialogDescription>

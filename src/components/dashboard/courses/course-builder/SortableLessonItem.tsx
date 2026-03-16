@@ -42,6 +42,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ApiErrorResponse } from "@/interfaces/response.interface";
+import { AxiosError } from "axios";
 
 interface SortableLessonItemProps {
   lesson: ILessonWithState;
@@ -79,6 +81,11 @@ export const SortableLessonItem = ({
       toast.success("Lesson deleted");
       queryClient.invalidateQueries({ queryKey: ["course-modules", courseId] });
       setShowDeleteDialog(false);
+    },
+    onError: (error: AxiosError<ApiErrorResponse>) => {
+      toast.error("Failed to delete lesson", {
+        description: error.response?.data?.message,
+      });
     },
   });
 
@@ -129,7 +136,7 @@ export const SortableLessonItem = ({
               <GripVertical className="h-4 w-4 text-muted-foreground" />
             </button>
           </TooltipTrigger>
-          <TooltipContent >
+          <TooltipContent>
             <p>Drag to reorder</p>
           </TooltipContent>
         </Tooltip>
@@ -140,7 +147,7 @@ export const SortableLessonItem = ({
               {getLessonIcon()}
             </div>
           </TooltipTrigger>
-          <TooltipContent >
+          <TooltipContent>
             <p>{getLessonTypeLabel()}</p>
           </TooltipContent>
         </Tooltip>
@@ -162,7 +169,7 @@ export const SortableLessonItem = ({
                     Preview
                   </Badge>
                 </TooltipTrigger>
-                <TooltipContent >
+                <TooltipContent>
                   <p>Free preview available</p>
                 </TooltipContent>
               </Tooltip>
@@ -178,7 +185,7 @@ export const SortableLessonItem = ({
                     Draft
                   </Badge>
                 </TooltipTrigger>
-                <TooltipContent >
+                <TooltipContent>
                   <p>Not published yet</p>
                 </TooltipContent>
               </Tooltip>
@@ -189,7 +196,7 @@ export const SortableLessonItem = ({
                 <TooltipTrigger asChild>
                   <HelpCircle className="h-3 w-3 text-amber-500 cursor-pointer" />
                 </TooltipTrigger>
-                <TooltipContent >
+                <TooltipContent>
                   <p>Has quiz</p>
                 </TooltipContent>
               </Tooltip>
@@ -236,7 +243,7 @@ export const SortableLessonItem = ({
                   }
                 />
               </TooltipTrigger>
-              <TooltipContent >
+              <TooltipContent>
                 <p>Add quiz</p>
               </TooltipContent>
             </Tooltip>
@@ -255,7 +262,7 @@ export const SortableLessonItem = ({
                 </Button>
               </LessonForm>
             </TooltipTrigger>
-            <TooltipContent >
+            <TooltipContent>
               <p>Edit lesson</p>
             </TooltipContent>
           </Tooltip>
@@ -271,7 +278,7 @@ export const SortableLessonItem = ({
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent >
+            <TooltipContent>
               <p>Delete lesson</p>
             </TooltipContent>
           </Tooltip>
@@ -302,7 +309,10 @@ export const SortableLessonItem = ({
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteMutation.mutate()}
+              onClick={(e) => {
+                e.preventDefault();
+                deleteMutation.mutate();
+              }}
               disabled={deleteMutation.isPending}
               className="bg-destructive text-destructive-foreground"
             >

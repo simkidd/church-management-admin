@@ -217,7 +217,7 @@ export const SortableModuleItem = ({
             )}
 
             <Tooltip>
-              <TooltipTrigger >
+              <TooltipTrigger>
                 <ModuleForm courseId={courseId} initialValues={module} isEdit>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                     <Edit2 className="h-4 w-4" />
@@ -317,7 +317,8 @@ export const SortableModuleItem = ({
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 onDelete();
                 setShowDeleteDialog(false);
               }}
