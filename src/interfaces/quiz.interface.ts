@@ -110,8 +110,6 @@ export interface CreateQuizPayload {
   scopeType: "lesson" | "module" | "course";
   gradingMode: "auto" | "manual";
   passingScore: number;
-  attemptsAllowed: number;
-  durationMinutes: number;
   shuffleQuestions: boolean;
   showResultsImmediately: boolean;
   questions: QuizQuestionPayload[];

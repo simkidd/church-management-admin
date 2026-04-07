@@ -63,10 +63,10 @@ const LessonQuizCard = ({
     <>
       <div
         className={cn(
-          "flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 p-2 sm:p-2 rounded-md",
-          "bg-amber-50/50 dark:bg-amber-950/20",
-          "border border-amber-200/50 dark:border-amber-900/50",
-          "ml-4 sm:ml-8", // Smaller margin on mobile
+          "flex items-start justify-between gap-3 p-3 rounded-lg",
+          "bg-amber-50/60 dark:bg-amber-950/20",
+          "border border-amber-200/60 dark:border-amber-900/50",
+          "ml-4 sm:ml-8",
         )}
       >
         {/* Top row: Icon, Title, Badge, Actions */}

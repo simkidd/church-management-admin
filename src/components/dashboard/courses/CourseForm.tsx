@@ -370,7 +370,7 @@ const CourseForm = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent
-        className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-4xl! max-h-[90vh] overflow-y-auto"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -384,106 +384,108 @@ const CourseForm = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FieldGroup>
-            {/* Thumbnail Upload */}
-            <Field>
-              <FieldLabel className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4" />
-                Course Thumbnail
-              </FieldLabel>
-              {thumbnailPreview ? (
-                <div className="relative aspect-video rounded-lg border-2 border-dashed h-full w-full">
-                  <Image
-                    src={thumbnailPreview}
-                    alt="Course thumbnail preview"
-                    className="w-full h-full object-contain"
-                    width={800}
-                    height={450}
-                    priority
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 h-6 w-6"
-                    onClick={handleRemoveThumbnail}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              ) : (
-                <div
-                  {...getThumbnailRootProps()}
-                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                    isThumbnailDragActive
-                      ? "border-primary bg-primary/5"
-                      : "border-border"
-                  }`}
-                >
-                  <input {...getThumbnailInputProps()} />
-                  <div className="flex flex-col items-center justify-center gap-2 aspect-video">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      {isThumbnailDragActive
-                        ? "Drop the image here..."
-                        : "Drag & drop an image, or click to select"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG, WEBP up to 5MB
-                    </p>
+            <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
+              {/* Thumbnail Upload */}
+              <Field>
+                <FieldLabel className="flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4" />
+                  Course Thumbnail
+                </FieldLabel>
+                {thumbnailPreview ? (
+                  <div className="relative aspect-video rounded-lg border-2 border-dashed h-full w-full">
+                    <Image
+                      src={thumbnailPreview}
+                      alt="Course thumbnail preview"
+                      className="w-full h-full object-contain"
+                      width={800}
+                      height={450}
+                      priority
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-6 w-6"
+                      onClick={handleRemoveThumbnail}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
                   </div>
-                </div>
-              )}
-            </Field>
-
-            <Field>
-              <FieldLabel className="flex items-center gap-2">
-                <Video className="h-4 w-4" />
-                Intro Video
-              </FieldLabel>
-
-              {introVideoPreview ? (
-                <div className="relative rounded-lg border bg-muted overflow-hidden">
-                  <video
-                    src={introVideoPreview}
-                    className="w-full aspect-video"
-                    controls
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 h-7 w-7"
-                    onClick={handleRemoveIntroVideo}
+                ) : (
+                  <div
+                    {...getThumbnailRootProps()}
+                    className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                      isThumbnailDragActive
+                        ? "border-primary bg-primary/5"
+                        : "border-border"
+                    }`}
                   >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              ) : (
-                <div
-                  {...getIntroVideoRootProps()}
-                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                    isIntroVideoDragActive
-                      ? "border-primary bg-primary/5"
-                      : "border-border"
-                  }`}
-                >
-                  <input {...getIntroVideoInputProps()} />
-                  <div className="flex flex-col items-center justify-center gap-2 aspect-video">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      {isIntroVideoDragActive
-                        ? "Drop the intro video here..."
-                        : "Drag & drop an intro video, or click to select"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      MP4, MOV, AVI, MKV, WEBM up to 500MB
-                    </p>
+                    <input {...getThumbnailInputProps()} />
+                    <div className="flex flex-col items-center justify-center gap-2 aspect-video">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        {isThumbnailDragActive
+                          ? "Drop the image here..."
+                          : "Drag & drop an image, or click to select"}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        PNG, JPG, WEBP up to 5MB
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-            </Field>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel className="flex items-center gap-2">
+                  <Video className="h-4 w-4" />
+                  Intro Video
+                </FieldLabel>
+
+                {introVideoPreview ? (
+                  <div className="relative aspect-video rounded-lg border-2 border-dashed h-full w-full">
+                    <video
+                      src={introVideoPreview}
+                      className="w-full object-contain"
+                      controls
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-7 w-7"
+                      onClick={handleRemoveIntroVideo}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div
+                    {...getIntroVideoRootProps()}
+                    className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                      isIntroVideoDragActive
+                        ? "border-primary bg-primary/5"
+                        : "border-border"
+                    }`}
+                  >
+                    <input {...getIntroVideoInputProps()} />
+                    <div className="flex flex-col items-center justify-center gap-2 aspect-video">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        {isIntroVideoDragActive
+                          ? "Drop the intro video here..."
+                          : "Drag & drop an intro video, or click to select"}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        MP4, MOV, AVI, MKV, WEBM up to 500MB
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </Field>
+            </div>
 
             {/* Course Title */}
             <Controller
@@ -528,100 +530,109 @@ const CourseForm = ({
               )}
             />
 
-            {/* Instructor */}
-            <Controller
-              name="instructor"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="instructor">Instructor</FieldLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isLoading || isLoadingInstructors}
-                  >
-                    <SelectTrigger
-                      id="instructor"
-                      className={fieldState.invalid ? "border-destructive" : ""}
+            <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
+              {/* Instructor */}
+              <Controller
+                name="instructor"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="instructor">Instructor</FieldLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isLoading || isLoadingInstructors}
                     >
-                      <SelectValue placeholder="Select an instructor">
-                        {selectedInstructorId ? (
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              {getSelectedInstructorName(selectedInstructorId)}
-                            </span>
-                          </div>
-                        ) : (
-                          "Select an instructor"
-                        )}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {isLoadingInstructors ? (
-                        <div className="flex items-center justify-center py-4">
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          <span className="text-sm text-muted-foreground">
-                            Loading instructors...
-                          </span>
-                        </div>
-                      ) : !instructors || instructors.length === 0 ? (
-                        <div className="text-center py-4 text-sm text-muted-foreground">
-                          No instructors found
-                        </div>
-                      ) : (
-                        instructors.map((instructor) => (
-                          <SelectItem key={instructor.id} value={instructor.id}>
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                {instructor.firstName} {instructor.lastName}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {instructor.email}
+                      <SelectTrigger
+                        id="instructor"
+                        className={
+                          fieldState.invalid ? "border-destructive" : ""
+                        }
+                      >
+                        <SelectValue placeholder="Select an instructor">
+                          {selectedInstructorId ? (
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <span>
+                                {getSelectedInstructorName(
+                                  selectedInstructorId,
+                                )}
                               </span>
                             </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+                          ) : (
+                            "Select an instructor"
+                          )}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {isLoadingInstructors ? (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            <span className="text-sm text-muted-foreground">
+                              Loading instructors...
+                            </span>
+                          </div>
+                        ) : !instructors || instructors.length === 0 ? (
+                          <div className="text-center py-4 text-sm text-muted-foreground">
+                            No instructors found
+                          </div>
+                        ) : (
+                          instructors.map((instructor) => (
+                            <SelectItem
+                              key={instructor.id}
+                              value={instructor.id}
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-medium">
+                                  {instructor.firstName} {instructor.lastName}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {instructor.email}
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
 
-            {/* Duration */}
-            <Controller
-              name="duration"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Duration</FieldLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className="cursor-pointer">
-                      <SelectValue placeholder="Select duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="4 weeks">4 weeks</SelectItem>
-                      <SelectItem value="6 weeks">6 weeks</SelectItem>
-                      <SelectItem value="8 weeks">8 weeks</SelectItem>
-                      <SelectItem value="3 months">3 months</SelectItem>
-                      <SelectItem value="6 months">6 months</SelectItem>
-                      <SelectItem value="1 year">1 year</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+              {/* Duration */}
+              <Controller
+                name="duration"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Duration</FieldLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger className="cursor-pointer">
+                        <SelectValue placeholder="Select duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="4 weeks">4 weeks</SelectItem>
+                        <SelectItem value="6 weeks">6 weeks</SelectItem>
+                        <SelectItem value="8 weeks">8 weeks</SelectItem>
+                        <SelectItem value="3 months">3 months</SelectItem>
+                        <SelectItem value="6 months">6 months</SelectItem>
+                        <SelectItem value="1 year">1 year</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
 
             {/* Progression Mode */}
             <Controller
