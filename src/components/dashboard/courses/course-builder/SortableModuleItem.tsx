@@ -95,161 +95,237 @@ export const SortableModuleItem = ({
         ref={setNodeRef}
         style={style}
         className={cn(
-          "group rounded-lg border bg-card shadow-sm overflow-hidden",
+          "rounded-lg border bg-card shadow-sm overflow-hidden",
           isDragging && "opacity-50 shadow-lg ring-2 ring-primary",
           !module.isPublished && "border-dashed",
         )}
       >
-        <div className="flex items-center gap-3 p-4 bg-card">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                {...attributes}
-                {...listeners}
-                className="p-1.5 rounded hover:bg-muted cursor-grab active:cursor-grabbing touch-none opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <GripVertical className="h-5 w-5 text-muted-foreground" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>Drag to reorder</p>
-            </TooltipContent>
-          </Tooltip>
+        <div className="p-3 sm:p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
+              <div className="flex items-center gap-1 shrink-0 pt-0.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      {...attributes}
+                      {...listeners}
+                      className="rounded-md p-2 hover:bg-muted cursor-grab active:cursor-grabbing touch-none"
+                    >
+                      <GripVertical className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>Drag to reorder</p>
+                  </TooltipContent>
+                </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={onToggle}
-                className="p-1.5 rounded hover:bg-muted transition-colors cursor-pointer"
-              >
-                {isExpanded ? (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={onToggle}
+                      className="rounded-md p-2 hover:bg-muted transition-colors"
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>{isExpanded ? "Collapse module" : "Expand module"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="font-mono text-[11px]">
+                    M{moduleIndex + 1}
+                  </Badge>
+
+                  <h3 className="min-w-0 break-words text-sm font-semibold sm:text-base">
+                    {module.title}
+                  </h3>
+
+                  {!module.isPublished && (
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] sm:text-xs"
+                    >
+                      Draft
+                    </Badge>
+                  )}
+                </div>
+
+                {module.description && (
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    {module.description}
+                  </p>
                 )}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{isExpanded ? "Collapse module" : "Expand module"}</p>
-            </TooltipContent>
-          </Tooltip>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                M{moduleIndex + 1}
-              </span>
-              <h3 className="font-semibold truncate">{module.title}</h3>
-              {!module.isPublished && (
-                <Badge variant="secondary" className="text-xs">
-                  Draft
-                </Badge>
-              )}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                    <PlayCircle className="h-3.5 w-3.5" />
+                    <span>{module.lessons?.length || 0} lessons</span>
+                  </div>
+
+                  {module.quiz && (
+                    <div className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+                      <HelpCircle className="h-3.5 w-3.5" />
+                      <span>Module quiz</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {module.description && (
-              <p className="text-sm text-muted-foreground truncate mt-0.5">
-                {module.description}
-              </p>
-            )}
-          </div>
+            <div className="shrink-0">
+              <div className="hidden items-center justify-end gap-1 whitespace-nowrap sm:flex">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <LessonForm moduleId={module._id} courseId={courseId}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 w-9 p-0"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </LessonForm>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>Add lesson</p>
+                  </TooltipContent>
+                </Tooltip>
 
-          <div className="hidden sm:flex items-center gap-4 text-sm text-muted-foreground">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="flex items-center gap-1">
-                  <PlayCircle className="h-4 w-4" />
-                  {module.lessons?.length || 0}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>{module.lessons?.length || 0} lessons</p>
-              </TooltipContent>
-            </Tooltip>
+                {!module.quiz && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <QuizForm
+                          courseId={courseId}
+                          moduleId={module._id}
+                          scopeType="module"
+                          trigger={
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-9 w-9 p-0"
+                            >
+                              <HelpCircle className="h-4 w-4 text-amber-500" />
+                            </Button>
+                          }
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>Add module quiz</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
 
-            {module.quiz && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="flex items-center gap-1">
-                    <HelpCircle className="h-4 w-4 text-amber-500" />
-                    Quiz
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p>Module has a quiz</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <ModuleForm
+                        courseId={courseId}
+                        initialValues={module}
+                        isEdit
+                      >
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 w-9 p-0"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      </ModuleForm>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>Edit module</p>
+                  </TooltipContent>
+                </Tooltip>
 
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={onToggle}>
+                      {isExpanded ? "Collapse" : "Expand"}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => setShowDeleteDialog(true)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Module
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div className="flex items-center justify-end gap-1 whitespace-nowrap sm:hidden">
                 <LessonForm moduleId={module._id} courseId={courseId}>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
                     <Plus className="h-4 w-4" />
                   </Button>
                 </LessonForm>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>Add lesson</p>
-              </TooltipContent>
-            </Tooltip>
 
-            {!module.quiz && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <QuizForm
-                    courseId={courseId}
-                    moduleId={module._id}
-                    scopeType="module"
-                    trigger={
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <HelpCircle className="h-4 w-4 text-amber-500" />
-                      </Button>
-                    }
-                  />
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <p>Add quiz</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    {!module.quiz && (
+                      <QuizForm
+                        courseId={courseId}
+                        moduleId={module._id}
+                        scopeType="module"
+                        trigger={
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            <HelpCircle className="mr-2 h-4 w-4 text-amber-500" />
+                            Add Module Quiz
+                          </DropdownMenuItem>
+                        }
+                      />
+                    )}
 
-            <Tooltip>
-              <TooltipTrigger>
-                <ModuleForm courseId={courseId} initialValues={module} isEdit>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                </ModuleForm>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>Edit module</p>
-              </TooltipContent>
-            </Tooltip>
+                    <ModuleForm
+                      courseId={courseId}
+                      initialValues={module}
+                      isEdit
+                    >
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <Edit2 className="mr-2 h-4 w-4" />
+                        Edit Module
+                      </DropdownMenuItem>
+                    </ModuleForm>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
+                    <DropdownMenuSeparator />
 
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={onToggle}>
-                  {isExpanded ? "Collapse" : "Expand"}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Module
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => setShowDeleteDialog(true)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Module
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -261,7 +337,7 @@ export const SortableModuleItem = ({
               exit={{ height: 0, opacity: 0 }}
               className="border-t bg-muted/30"
             >
-              <div className="p-4 space-y-3">
+              <div className="p-3 sm:p-4 space-y-3">
                 {module.lessons && module.lessons.length > 0 ? (
                   <SortableContext
                     items={module.lessons.map((l) => l._id)}
@@ -303,7 +379,7 @@ export const SortableModuleItem = ({
       </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Module?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -312,8 +388,11 @@ export const SortableModuleItem = ({
               {module.quiz ? " and quiz" : ""}.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteLoading}>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel
+              disabled={deleteLoading}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
@@ -323,7 +402,7 @@ export const SortableModuleItem = ({
                 setShowDeleteDialog(false);
               }}
               disabled={deleteLoading}
-              className="bg-destructive text-destructive-foreground"
+              className="bg-destructive text-destructive-foreground w-full sm:w-auto"
             >
               {deleteLoading ? "Deleting..." : "Delete"}
             </AlertDialogAction>

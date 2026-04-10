@@ -102,10 +102,21 @@ const navGroups: INavGroup[] = [
         roles: ["super-admin", "admin", "instructor"],
         icon: BookOpen,
       },
-    
+      {
+        title: "Certificates",
+        url: "/dashboard/certificates",
+        roles: ["super-admin", "admin", "instructor"],
+        icon: Award,
+      },
+      {
+        title: "Certificate Templates",
+        url: "/dashboard/certificates/templates",
+        roles: ["super-admin", "admin"],
+        icon: FileCheck,
+      },
     ],
   },
-  
+
   {
     title: "Sermon Management",
     roles: ["super-admin", "admin", "pastor"],
@@ -251,7 +262,7 @@ export function DashboardSidebar() {
     return (
       <Sidebar collapsible="icon" className="border-r">
         <SidebarHeader className="px-2 py-2 border-b min-h-16 ">
-          <div className="flex items-center py-1">
+          <div className="flex items-center py-1 px-2">
             <Link href="/" className="flex items-center gap-2 font-medium">
               <Logo className="h-8" />
               {config.SITE_NAME}
@@ -298,7 +309,7 @@ export function DashboardSidebar() {
                 "group-data-[collapsible=icon]:block",
                 "group-data-[collapsible=icon]:w-8",
                 "group-data-[state=expanded]:hidden",
-                "hidden md:block"
+                "hidden md:block",
               )}
             >
               <Logo className="h-8" />
@@ -307,7 +318,7 @@ export function DashboardSidebar() {
               className={cn(
                 "transition-all duration-200",
                 "group-data-[collapsible=icon]:hidden",
-                "group-data-[state=expanded]:block"
+                "group-data-[state=expanded]:block",
               )}
             >
               <div className="flex items-center gap-2 font-medium text-nowrap">

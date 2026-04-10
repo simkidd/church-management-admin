@@ -31,12 +31,12 @@ export const CourseQuizBanner = ({
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-lg border bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-900 p-4">
+      <div className="relative overflow-hidden rounded-lg border bg-linear-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-900 p-4">
         <div className="absolute top-0 right-0 p-4 opacity-10">
           <Trophy className="h-24 w-24 text-amber-600" />
         </div>
 
-        <div className="relative flex items-center justify-between">
+        <div className="relative flex sm:items-center justify-between gap-4 flex-col sm:flex-row">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900/50">
               <Trophy className="h-6 w-6 text-amber-600 dark:text-amber-400" />
@@ -62,7 +62,7 @@ export const CourseQuizBanner = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             <QuizForm
               courseId={courseId}
               scopeType="course"

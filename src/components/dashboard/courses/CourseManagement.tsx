@@ -372,9 +372,11 @@ export function CourseManagement() {
                     {/* Title & Description */}
                     <TableCell>
                       <div className="flex flex-col max-w-60">
-                        <span className="font-medium text-sm truncate">
-                          {course.title}
-                        </span>
+                        <Link href={`/dashboard/courses/${course._id}`}>
+                          <span className="font-medium text-sm truncate">
+                            {course.title}
+                          </span>
+                        </Link>
                       </div>
                     </TableCell>
 

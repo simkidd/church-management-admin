@@ -1,33 +1,35 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import {
-  useFieldArray,
-  useForm,
-  Controller,
-  useWatch,
-  Control,
-  useFormState,
-} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { toast } from "sonner";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Plus,
-  Trash2,
   CheckCircle2,
-  X,
-  Clock,
-  Trophy,
-  Settings,
   LayoutList,
   Loader2,
+  Plus,
+  Settings,
+  Trash2,
+  Trophy,
+  X,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Control,
+  Controller,
+  useFieldArray,
+  useForm,
+  useFormState,
+  useWatch,
+} from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -39,8 +41,6 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -48,21 +48,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  IQuiz,
   CreateQuizPayload,
+  IQuiz,
   QuizQuestionType,
   UpdateQuizPayload,
 } from "@/interfaces/quiz.interface";
 import { ApiErrorResponse } from "@/interfaces/response.interface";
 import { quizApi } from "@/lib/api/quiz.api";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const QUESTION_TYPES = [
   "single-choice",
@@ -138,8 +137,6 @@ const quizFormSchema = z.object({
   description: z.string().max(500).optional(),
   scopeType: z.enum(["lesson", "module", "course"]),
   passingScore: z.number().min(0).max(100),
-  attemptsAllowed: z.number().int().min(1),
-  durationMinutes: z.number().int().min(0),
   shuffleQuestions: z.boolean(),
   showResultsImmediately: z.boolean(),
   gradingMode: z.enum(["auto", "manual"]),
@@ -222,8 +219,6 @@ const getFormValuesFromQuiz = (
   scopeType:
     (quiz?.scopeType as "lesson" | "module" | "course") || fallbackScopeType,
   passingScore: quiz?.passingScore || 70,
-  attemptsAllowed: quiz?.attemptsAllowed || 1,
-  durationMinutes: quiz?.durationMinutes || 0,
   shuffleQuestions: quiz?.shuffleQuestions || false,
   showResultsImmediately: quiz?.showResultsImmediately ?? true,
   gradingMode: quiz?.gradingMode || "auto",
@@ -353,8 +348,6 @@ export const QuizForm: React.FC<QuizFormProps> = ({
         description: values.description,
         gradingMode: values.gradingMode,
         passingScore: values.passingScore,
-        attemptsAllowed: values.attemptsAllowed,
-        durationMinutes: values.durationMinutes,
         shuffleQuestions: values.shuffleQuestions,
         showResultsImmediately: values.showResultsImmediately,
         questions: normalizedQuestions,
@@ -373,8 +366,6 @@ export const QuizForm: React.FC<QuizFormProps> = ({
       scopeType: values.scopeType,
       gradingMode: values.gradingMode,
       passingScore: values.passingScore,
-      attemptsAllowed: values.attemptsAllowed,
-      durationMinutes: values.durationMinutes,
       shuffleQuestions: values.shuffleQuestions,
       showResultsImmediately: values.showResultsImmediately,
       questions: normalizedQuestions,
@@ -437,316 +428,293 @@ export const QuizForm: React.FC<QuizFormProps> = ({
       <DialogTrigger asChild>{trigger || children}</DialogTrigger>
 
       <DialogContent
+        showCloseButton={false}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-[920px] max-h-[92vh] overflow-hidden p-0"
       >
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className={cn("p-2 rounded-lg", getScopeColor())}>
-              <Trophy className="h-5 w-5" />
-            </div>
-            <div>
-              <DialogTitle>{isEdit ? "Edit Quiz" : "Create Quiz"}</DialogTitle>
-              <DialogDescription className="flex items-center gap-2">
-                {getScopeLabel()}
-                <Badge variant="outline" className="text-xs">
-                  {scopeType}
-                </Badge>
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
+        <div className="flex h-full max-h-[92vh] flex-col">
+          <div className="border-b bg-background/95 px-6 py-5 backdrop-blur supports-backdrop-filter:bg-background/80">
+            <DialogHeader className="space-y-0">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      "rounded-xl p-2.5 shadow-sm",
+                      getScopeColor(),
+                    )}
+                  >
+                    <Trophy className="h-5 w-5" />
+                  </div>
 
-        {showEditSkeleton ? (
-          <QuizFormSkeleton />
-        ) : (
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <Tabs defaultValue="questions" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="questions">
-                  <LayoutList className="h-4 w-4 mr-2" />
-                  Questions ({fields.length})
-                </TabsTrigger>
-                <TabsTrigger value="settings">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </TabsTrigger>
-              </TabsList>
+                  <div>
+                    <DialogTitle className="text-xl font-semibold tracking-tight">
+                      {isEdit ? "Edit Quiz" : "Create Quiz"}
+                    </DialogTitle>
 
-              <TabsContent value="questions" className="space-y-4 mt-4">
-                <Card>
-                  <CardContent className="pt-6 space-y-4">
-                    <Controller
-                      name="title"
-                      control={form.control}
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel>Quiz Title *</FieldLabel>
-                          <Input
-                            {...field}
-                            placeholder="e.g., Module 1 Assessment"
-                            disabled={isLoading}
-                          />
-                          {fieldState.invalid && (
-                            <FieldError errors={[fieldState.error]} />
-                          )}
-                        </Field>
-                      )}
-                    />
-
-                    <Controller
-                      name="description"
-                      control={form.control}
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel>Description</FieldLabel>
-                          <Textarea
-                            {...field}
-                            placeholder="Instructions for students..."
-                            disabled={isLoading}
-                            rows={2}
-                          />
-                          {fieldState.invalid && (
-                            <FieldError errors={[fieldState.error]} />
-                          )}
-                        </Field>
-                      )}
-                    />
-                  </CardContent>
-                </Card>
-
-                <div className="space-y-4">
-                  <AnimatePresence initial={false}>
-                    {fields.map((field, index) => (
-                      <QuestionCard
-                        key={field.id}
-                        index={index}
-                        control={form.control}
-                        onRemove={() => remove(index)}
-                        isLoading={isLoading}
-                      />
-                    ))}
-                  </AnimatePresence>
+                    <DialogDescription className="mt-1 flex items-center gap-2 text-sm">
+                      <span>{getScopeLabel()}</span>
+                      <Badge variant="outline" className="capitalize">
+                        {scopeType}
+                      </Badge>
+                    </DialogDescription>
+                  </div>
                 </div>
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addQuestion}
-                  disabled={isLoading}
-                  className="w-full"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Question
-                </Button>
-              </TabsContent>
+                <div className="hidden sm:flex items-center gap-2">
+                  <Badge variant="secondary">
+                    {fields.length} question{fields.length !== 1 ? "s" : ""}
+                  </Badge>
+                </div>
+              </div>
+            </DialogHeader>
+          </div>
 
-              <TabsContent value="settings" className="space-y-4 mt-4">
-                <Card>
-                  <CardContent className="pt-6 space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <Controller
-                        name="passingScore"
-                        control={form.control}
-                        render={({ field, fieldState }) => (
-                          <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel className="flex items-center gap-2">
-                              <CheckCircle2 className="h-4 w-4" />
-                              Passing Score (%)
-                            </FieldLabel>
-                            <Input
-                              type="number"
-                              value={field.value ?? ""}
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.value === ""
-                                    ? 0
-                                    : Number(e.target.value),
-                                )
-                              }
-                              min={0}
-                              max={100}
-                              disabled={isLoading}
-                            />
-                            {fieldState.invalid && (
-                              <FieldError errors={[fieldState.error]} />
-                            )}
-                          </Field>
-                        )}
-                      />
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+            {showEditSkeleton ? (
+              <QuizFormSkeleton />
+            ) : (
+              <form onSubmit={form.handleSubmit(onSubmit)} className="relative">
+                <Tabs defaultValue="questions" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 rounded-xl bg-muted/70 p-1">
+                    <TabsTrigger value="questions" className="rounded-lg">
+                      <LayoutList className="mr-2 h-4 w-4" />
+                      Questions ({fields.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="settings" className="rounded-lg">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </TabsTrigger>
+                  </TabsList>
 
-                      <Controller
-                        name="attemptsAllowed"
-                        control={form.control}
-                        render={({ field, fieldState }) => (
-                          <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel>Attempts Allowed</FieldLabel>
-                            <Input
-                              type="number"
-                              value={field.value ?? ""}
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.value === ""
-                                    ? 1
-                                    : Number(e.target.value),
-                                )
-                              }
-                              min={1}
-                              disabled={isLoading}
-                            />
-                            {fieldState.invalid && (
-                              <FieldError errors={[fieldState.error]} />
-                            )}
-                          </Field>
-                        )}
-                      />
+                  <TabsContent value="questions" className="mt-5 space-y-5">
+                    <Card className="rounded-2xl border shadow-sm">
+                      <CardContent className="space-y-4 pt-6">
+                        <Controller
+                          name="title"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                              <FieldLabel>Quiz Title *</FieldLabel>
+                              <Input
+                                {...field}
+                                placeholder="e.g. Module 1 Assessment"
+                                disabled={isLoading}
+                                className="h-11"
+                              />
+                              {fieldState.invalid && (
+                                <FieldError errors={[fieldState.error]} />
+                              )}
+                            </Field>
+                          )}
+                        />
+
+                        <Controller
+                          name="description"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                              <FieldLabel>Description</FieldLabel>
+                              <Textarea
+                                {...field}
+                                placeholder="Add short instructions or context for learners..."
+                                disabled={isLoading}
+                                rows={3}
+                                className="resize-none"
+                              />
+                              {fieldState.invalid && (
+                                <FieldError errors={[fieldState.error]} />
+                              )}
+                            </Field>
+                          )}
+                        />
+                      </CardContent>
+                    </Card>
+
+                    <div className="space-y-4">
+                      <AnimatePresence initial={false}>
+                        {fields.map((field, index) => (
+                          <QuestionCard
+                            key={field.id}
+                            index={index}
+                            control={form.control}
+                            onRemove={() => remove(index)}
+                            isLoading={isLoading}
+                          />
+                        ))}
+                      </AnimatePresence>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <Controller
-                        name="durationMinutes"
-                        control={form.control}
-                        render={({ field, fieldState }) => (
-                          <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel className="flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              Time Limit (minutes)
-                            </FieldLabel>
-                            <Input
-                              type="number"
-                              value={field.value ?? ""}
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.value === ""
-                                    ? 0
-                                    : Number(e.target.value),
-                                )
-                              }
-                              min={0}
-                              placeholder="0 = no limit"
-                              disabled={isLoading}
-                            />
-                            {fieldState.invalid && (
-                              <FieldError errors={[fieldState.error]} />
-                            )}
-                          </Field>
-                        )}
-                      />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={addQuestion}
+                      disabled={isLoading}
+                      className="h-11 w-full rounded-xl"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add New Question
+                    </Button>
+                  </TabsContent>
 
-                      <Controller
-                        name="gradingMode"
-                        control={form.control}
-                        render={({ field }) => (
-                          <Field>
-                            <FieldLabel>Grading Mode</FieldLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              disabled={isLoading}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="auto">Automatic</SelectItem>
-                                <SelectItem value="manual">
-                                  Manual Review
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </Field>
-                        )}
-                      />
-                    </div>
+                  <TabsContent value="settings" className="mt-5 space-y-4">
+                    <Card className="rounded-2xl border shadow-sm">
+                      <CardContent className="space-y-6 pt-6">
+                        <Controller
+                          name="passingScore"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                              <FieldLabel className="flex items-center gap-2">
+                                <CheckCircle2 className="h-4 w-4" />
+                                Passing Score (%)
+                              </FieldLabel>
+                              <Input
+                                type="number"
+                                value={field.value ?? ""}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    e.target.value === ""
+                                      ? 0
+                                      : Number(e.target.value),
+                                  )
+                                }
+                                min={0}
+                                max={100}
+                                disabled={isLoading}
+                                className="h-11"
+                              />
+                              {fieldState.invalid && (
+                                <FieldError errors={[fieldState.error]} />
+                              )}
+                            </Field>
+                          )}
+                        />
 
-                    <Separator />
-
-                    <div className="space-y-3">
-                      <Controller
-                        name="shuffleQuestions"
-                        control={form.control}
-                        render={({ field }) => (
-                          <div className="flex items-start gap-3">
-                            <Checkbox
-                              id="shuffleQuestions"
-                              checked={field.value}
-                              onCheckedChange={(checked) =>
-                                field.onChange(Boolean(checked))
-                              }
-                              disabled={isLoading}
-                            />
-                            <div>
-                              <label
-                                htmlFor="shuffleQuestions"
-                                className="font-medium cursor-pointer"
+                        <Controller
+                          name="gradingMode"
+                          control={form.control}
+                          render={({ field }) => (
+                            <Field>
+                              <FieldLabel>Grading Mode</FieldLabel>
+                              <Select
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                disabled={isLoading}
                               >
-                                Shuffle Questions
-                              </label>
-                              <p className="text-sm text-muted-foreground">
-                                Randomize question order for each attempt
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      />
+                                <SelectTrigger className="h-11">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="auto">
+                                    Automatic
+                                  </SelectItem>
+                                  <SelectItem value="manual">
+                                    Manual Review
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </Field>
+                          )}
+                        />
 
-                      <Controller
-                        name="showResultsImmediately"
-                        control={form.control}
-                        render={({ field }) => (
-                          <div className="flex items-start gap-3">
-                            <Checkbox
-                              id="showResultsImmediately"
-                              checked={field.value}
-                              onCheckedChange={(checked) =>
-                                field.onChange(Boolean(checked))
-                              }
-                              disabled={isLoading}
-                            />
-                            <div>
-                              <label
-                                htmlFor="showResultsImmediately"
-                                className="font-medium cursor-pointer"
-                              >
-                                Show Results Immediately
-                              </label>
-                              <p className="text-sm text-muted-foreground">
-                                Display score and feedback after submission
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                        <Separator />
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
+                        <div className="space-y-4">
+                          <Controller
+                            name="shuffleQuestions"
+                            control={form.control}
+                            render={({ field }) => (
+                              <div className="flex items-start gap-3 rounded-xl border p-4">
+                                <Checkbox
+                                  id="shuffleQuestions"
+                                  checked={field.value}
+                                  onCheckedChange={(checked) =>
+                                    field.onChange(Boolean(checked))
+                                  }
+                                  disabled={isLoading}
+                                />
+                                <div>
+                                  <label
+                                    htmlFor="shuffleQuestions"
+                                    className="font-medium cursor-pointer"
+                                  >
+                                    Shuffle Questions
+                                  </label>
+                                  <p className="text-sm text-muted-foreground">
+                                    Randomize question order for each learner
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          />
 
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {isEdit ? "Saving..." : "Creating..."}
-                  </>
-                ) : (
-                  <>{isEdit ? "Save Quiz" : "Create Quiz"}</>
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        )}
+                          <Controller
+                            name="showResultsImmediately"
+                            control={form.control}
+                            render={({ field }) => (
+                              <div className="flex items-start gap-3 rounded-xl border p-4">
+                                <Checkbox
+                                  id="showResultsImmediately"
+                                  checked={field.value}
+                                  onCheckedChange={(checked) =>
+                                    field.onChange(Boolean(checked))
+                                  }
+                                  disabled={isLoading}
+                                />
+                                <div>
+                                  <label
+                                    htmlFor="showResultsImmediately"
+                                    className="font-medium cursor-pointer"
+                                  >
+                                    Show Results Immediately
+                                  </label>
+                                  <p className="text-sm text-muted-foreground">
+                                    Learners see score and feedback right after
+                                    submission
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+
+                <div className="sticky bottom-0 z-10 -mx-6 border-t bg-background/95 px-6 py-4 backdrop-blur supports-backdrop-filter:bg-background/80">
+                  <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleClose}
+                      disabled={isLoading}
+                      className="w-full sm:w-auto"
+                    >
+                      Cancel
+                    </Button>
+
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full sm:w-auto"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          {isEdit ? "Saving..." : "Creating..."}
+                        </>
+                      ) : (
+                        <>{isEdit ? "Save Quiz" : "Create Quiz"}</>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -784,6 +752,11 @@ const QuestionCard = ({
     control,
     name: `questions.${index}.options`,
   }) as Array<{ text: string; isCorrect: boolean }> | undefined;
+
+  const questionTitle = useWatch({
+    control,
+    name: `questions.${index}.question`,
+  }) as string | undefined;
 
   useEffect(() => {
     const currentOptions = options ?? [];
@@ -835,87 +808,116 @@ const QuestionCard = ({
   };
 
   const { errors } = useFormState({ control });
-
   const optionError = errors?.questions?.[index]?.options?.message as
     | string
     | undefined;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, height: 0 }}
-      className="border rounded-lg bg-card p-4 space-y-4"
+      exit={{ opacity: 0, y: -10 }}
+      className="rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-md"
     >
-      <div className="flex items-start gap-3">
-        <div className="p-2 rounded bg-muted shrink-0">
-          <span className="font-mono text-sm font-bold">Q{index + 1}</span>
+      <div className="border-b px-4 py-3 sm:px-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted font-mono text-sm font-bold">
+              Q{index + 1}
+            </div>
+
+            <div className="min-w-0">
+              <p className="truncate font-medium">
+                {questionTitle?.trim() || `Untitled Question ${index + 1}`}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {questionType === "single-choice" && "Single choice"}
+                {questionType === "multiple-choice" && "Multiple choice"}
+                {questionType === "true-false" && "True / False"}
+              </p>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onRemove}
+            disabled={isLoading}
+            className="h-8 w-8 shrink-0 p-0 text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
+      </div>
 
-        <div className="flex-1 space-y-4">
-          <Controller
-            name={`questions.${index}.question`}
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Question *</FieldLabel>
-                <Textarea
-                  {...field}
-                  placeholder="Enter your question..."
-                  disabled={isLoading}
-                  rows={2}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
+      <div className="space-y-5 p-4 sm:p-5">
+        <Controller
+          name={`questions.${index}.question`}
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Question *</FieldLabel>
+              <Textarea
+                {...field}
+                placeholder="Enter your question..."
+                disabled={isLoading}
+                rows={3}
+                className="resize-none"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
-          <Controller
-            name={`questions.${index}.type`}
-            control={control}
-            render={({ field }) => (
-              <Field>
-                <FieldLabel>Question Type</FieldLabel>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { value: "single-choice", label: "Single Choice" },
-                    { value: "multiple-choice", label: "Multiple Choice" },
-                    { value: "true-false", label: "True / False" },
-                  ].map((type) => (
-                    <button
-                      key={type.value}
-                      type="button"
-                      onClick={() => field.onChange(type.value)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
-                        field.value === type.value
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted hover:bg-muted/80",
-                      )}
-                      disabled={isLoading}
-                    >
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-            )}
-          />
+        <Controller
+          name={`questions.${index}.type`}
+          control={control}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel>Question Type</FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "single-choice", label: "Single Choice" },
+                  { value: "multiple-choice", label: "Multiple Choice" },
+                  { value: "true-false", label: "True / False" },
+                ].map((type) => (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => field.onChange(type.value)}
+                    disabled={isLoading}
+                    className={cn(
+                      "rounded-xl border px-3 py-2 text-sm font-medium transition-all",
+                      field.value === type.value
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        : "border-border bg-background hover:bg-muted",
+                    )}
+                  >
+                    {type.label}
+                  </button>
+                ))}
+              </div>
+            </Field>
+          )}
+        />
+
+        <div className="space-y-3">
+          <FieldLabel>
+            Options *
+            <span className="ml-2 text-xs font-normal text-muted-foreground">
+              {questionType === "multiple-choice"
+                ? "Select one or more correct answers"
+                : "Select exactly one correct answer"}
+            </span>
+          </FieldLabel>
 
           <div className="space-y-2">
-            <FieldLabel>
-              Options *
-              <span className="ml-2 text-xs text-muted-foreground font-normal">
-                {questionType === "multiple-choice"
-                  ? "Select one or more correct answers"
-                  : "Select exactly one correct answer"}
-              </span>
-            </FieldLabel>
-
             {optionFields.map((option, optionIndex) => (
-              <div key={option.id} className="flex items-center gap-2">
+              <div
+                key={option.id}
+                className="flex items-center gap-2 rounded-xl border bg-background px-3 py-2"
+              >
                 <Controller
                   name={`questions.${index}.options.${optionIndex}.isCorrect`}
                   control={control}
@@ -948,6 +950,7 @@ const QuestionCard = ({
                           : `Option ${optionIndex + 1}`
                       }
                       disabled={isLoading || questionType === "true-false"}
+                      className="border-0 bg-transparent shadow-none focus-visible:ring-0"
                     />
                   )}
                 />
@@ -959,61 +962,51 @@ const QuestionCard = ({
                     size="sm"
                     onClick={() => removeOption(optionIndex)}
                     disabled={isLoading}
+                    className="h-8 w-8 p-0"
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 )}
               </div>
             ))}
-
-            {optionError && (
-              <p className="text-sm text-destructive mt-1">{optionError}</p>
-            )}
-
-            {questionType !== "true-false" && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addOption}
-                disabled={isLoading}
-              >
-                <Plus className="h-4 w-4" />
-                Add Option
-              </Button>
-            )}
           </div>
 
-          <Controller
-            name={`questions.${index}.explanation`}
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Explanation</FieldLabel>
-                <Textarea
-                  {...field}
-                  placeholder="Explain the correct answer..."
-                  disabled={isLoading}
-                  rows={2}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
+          {optionError && (
+            <p className="text-sm text-destructive">{optionError}</p>
+          )}
+
+          {questionType !== "true-false" && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addOption}
+              disabled={isLoading}
+              className="rounded-xl"
+            >
+              <Plus className="h-4 w-4" />
+              Add Option
+            </Button>
+          )}
         </div>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={onRemove}
-          disabled={isLoading}
-          className="text-destructive shrink-0"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <Controller
+          name={`questions.${index}.explanation`}
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Explanation</FieldLabel>
+              <Textarea
+                {...field}
+                placeholder="Explain the correct answer or add teaching context..."
+                disabled={isLoading}
+                rows={3}
+                className="resize-none"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
       </div>
     </motion.div>
   );
