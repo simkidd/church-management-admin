@@ -70,6 +70,26 @@ export const certificateApi = {
     return data;
   },
 
+  getTemplatePreviewUrl: async (
+    templateId: string,
+  ): Promise<ApiResponse<ICertificateTemplate>> => {
+    const { data } = await api.get(
+      `/certificate-templates/${templateId}/preview`,
+    );
+    return data;
+  },
+
+  previewTemplate: async (templateId: string): Promise<Blob> => {
+    const response = await api.get(
+      `/certificate-templates/${templateId}/preview`,
+      {
+        responseType: "blob",
+      },
+    );
+
+    return response.data;
+  },
+
   createTemplate: async (
     payload: FormData,
   ): Promise<ApiResponse<ICertificateTemplate>> => {
@@ -88,6 +108,11 @@ export const certificateApi = {
     const { data } = await api.patch(
       `/certificate-templates/${templateId}/update`,
       payload,
+      {
+        headers: {
+          "Content-Type": "multpart-formdata",
+        },
+      },
     );
     return data;
   },
@@ -102,7 +127,9 @@ export const certificateApi = {
   },
 
   deleteTemplate: async (templateId: string): Promise<ApiResponse<null>> => {
-    const { data } = await api.delete(`/certificate-templates/${templateId}`);
+    const { data } = await api.delete(
+      `/certificate-templates/${templateId}/delete`,
+    );
     return data;
   },
 };

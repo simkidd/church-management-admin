@@ -68,6 +68,9 @@ const CertificateTemplateForm = ({
   const [backgroundFile, setBackgroundFile] = useState<File | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [headingFontFile, setHeadingFontFile] = useState<File | null>(null);
+  const [bodyFontFile, setBodyFontFile] = useState<File | null>(null);
+  const [nameFontFile, setNameFontFile] = useState<File | null>(null);
 
   const [backgroundPreview, setBackgroundPreview] = useState<string | null>(
     initialValues?.backgroundUrl || null,
@@ -106,7 +109,9 @@ const CertificateTemplateForm = ({
     maxSize: 10 * 1024 * 1024,
     onDrop: (acceptedFiles, fileRejections) => {
       if (fileRejections.length > 0) {
-        toast.error("Invalid background image. Use PNG, JPG, or WEBP up to 10MB.");
+        toast.error(
+          "Invalid background image. Use PNG, JPG, or WEBP up to 10MB.",
+        );
         return;
       }
 
@@ -154,7 +159,9 @@ const CertificateTemplateForm = ({
     maxSize: 5 * 1024 * 1024,
     onDrop: (acceptedFiles, fileRejections) => {
       if (fileRejections.length > 0) {
-        toast.error("Invalid signature image. Use PNG, JPG, or WEBP up to 5MB.");
+        toast.error(
+          "Invalid signature image. Use PNG, JPG, or WEBP up to 5MB.",
+        );
         return;
       }
 
@@ -238,6 +245,9 @@ const CertificateTemplateForm = ({
     setBackgroundPreview(initialValues?.backgroundUrl || null);
     setLogoPreview(initialValues?.logoUrl || null);
     setSignaturePreview(initialValues?.signatureUrl || null);
+    setHeadingFontFile(null);
+    setBodyFontFile(null);
+    setNameFontFile(null);
     setRemoveBackground(false);
     setRemoveLogo(false);
     setRemoveSignature(false);
@@ -245,7 +255,8 @@ const CertificateTemplateForm = ({
   };
 
   const createMutation = useMutation({
-    mutationFn: async (payload: FormData) => certificateApi.createTemplate(payload),
+    mutationFn: async (payload: FormData) =>
+      certificateApi.createTemplate(payload),
     onSuccess: () => {
       toast.success("Certificate template created successfully");
       queryClient.invalidateQueries({ queryKey: ["certificate-templates"] });
@@ -297,6 +308,18 @@ const CertificateTemplateForm = ({
       formData.append("signature", signatureFile);
     }
 
+    if (headingFontFile) {
+      formData.append("headingFont", headingFontFile);
+    }
+
+    if (bodyFontFile) {
+      formData.append("bodyFont", bodyFontFile);
+    }
+
+    if (nameFontFile) {
+      formData.append("nameFont", nameFontFile);
+    }
+
     if (isEdit && removeBackground) {
       formData.append("removeBackground", "true");
     }
@@ -320,7 +343,10 @@ const CertificateTemplateForm = ({
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Dialog open={open} onOpenChange={(value) => (!value ? handleClose() : setOpen(value))}>
+    <Dialog
+      open={open}
+      onOpenChange={(value) => (!value ? handleClose() : setOpen(value))}
+    >
       <DialogTrigger asChild>{children}</DialogTrigger>
 
       <DialogContent
@@ -329,7 +355,9 @@ const CertificateTemplateForm = ({
       >
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit Certificate Template" : "Create Certificate Template"}
+            {isEdit
+              ? "Edit Certificate Template"
+              : "Create Certificate Template"}
           </DialogTitle>
           <DialogDescription>
             Upload the design assets used to render learner certificates.
@@ -434,7 +462,9 @@ const CertificateTemplateForm = ({
                     <input {...getLogoInputProps()} />
                     <div className="flex aspect-square flex-col items-center justify-center gap-2">
                       <Upload className="h-8 w-8 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Upload logo</p>
+                      <p className="text-sm text-muted-foreground">
+                        Upload logo
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         PNG, JPG, WEBP up to 5MB
                       </p>
@@ -509,7 +539,9 @@ const CertificateTemplateForm = ({
                     placeholder="Classic Completion Certificate"
                     disabled={isLoading}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />
@@ -526,7 +558,9 @@ const CertificateTemplateForm = ({
                     placeholder="Dominion City"
                     disabled={isLoading}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />
@@ -544,7 +578,9 @@ const CertificateTemplateForm = ({
                       placeholder="Dr John Doe"
                       disabled={isLoading}
                     />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
@@ -561,10 +597,56 @@ const CertificateTemplateForm = ({
                       placeholder="Lead Pastor"
                       disabled={isLoading}
                     />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              {/* Heading Font */}
+              <Field>
+                <FieldLabel>Heading Font</FieldLabel>
+                <Input
+                  type="file"
+                  accept=".ttf,.otf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setHeadingFontFile(file);
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">TTF or OTF</p>
+              </Field>
+
+              {/* Body Font */}
+              <Field>
+                <FieldLabel>Body Font</FieldLabel>
+                <Input
+                  type="file"
+                  accept=".ttf,.otf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setBodyFontFile(file);
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">TTF or OTF</p>
+              </Field>
+
+              {/* Name Font */}
+              <Field>
+                <FieldLabel>Name (Script) Font</FieldLabel>
+                <Input
+                  type="file"
+                  accept=".ttf,.otf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setNameFontFile(file);
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">TTF or OTF</p>
+              </Field>
             </div>
 
             <Controller
