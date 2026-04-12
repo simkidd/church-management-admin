@@ -41,7 +41,6 @@ export const CourseDetailsSkeleton = () => {
         <div className="flex flex-wrap gap-2">
           <Skeleton className="h-10 w-28 rounded-md" />
           <Skeleton className="h-10 w-36 rounded-md" />
-          <Skeleton className="h-10 w-40 rounded-md" />
         </div>
 
         {/* Overview content skeleton */}

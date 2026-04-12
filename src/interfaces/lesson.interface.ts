@@ -38,6 +38,7 @@ export interface ILessonWithState extends ILesson {
   isLockedForUser: boolean;
   progress: ILessonProgress;
   quiz: IQuizSummary | null;
+  materialCount: number
 }
 
 export interface ILessonWithQuiz extends ILesson {

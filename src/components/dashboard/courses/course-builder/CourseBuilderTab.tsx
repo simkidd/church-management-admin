@@ -1,9 +1,5 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
-import { toast } from "sonner";
 import {
   closestCenter,
   defaultDropAnimationSideEffects,
@@ -22,21 +18,25 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
+import { ILesson, ILessonWithState } from "@/interfaces/lesson.interface";
+import { IModule, IModuleWithState } from "@/interfaces/module.interface";
 import { ApiErrorResponse } from "@/interfaces/response.interface";
-import { ILesson, ILessonWithQuiz, ILessonWithState } from "@/interfaces/lesson.interface";
-import { IModule, IModuleWithLessons, IModuleWithState } from "@/interfaces/module.interface";
 import { lessonApi } from "@/lib/api/lesson.api";
 import { moduleApi } from "@/lib/api/module.api";
 import { quizApi } from "@/lib/api/quiz.api";
 
+import { IQuizSummary } from "@/interfaces/quiz.interface";
 import { CourseBuilderHeader } from "./CourseBuilderHeader";
 import { CourseBuilderSkeleton } from "./CourseBuilderSkeleton";
 import { CourseQuizBanner } from "./CourseQuizBanner";
+import { LessonDragOverlay, ModuleDragOverlay } from "./DragOverlays";
 import { EmptyState } from "./EmptyState";
-import { ModuleDragOverlay, LessonDragOverlay } from "./DragOverlays";
 import { SortableModuleItem } from "./SortableModuleItem";
-import { IQuizSummary } from "@/interfaces/quiz.interface";
 
 interface CourseBuilderTabProps {
   modules: IModuleWithState[];

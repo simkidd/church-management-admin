@@ -1,4 +1,4 @@
-import CourseBuilder from "@/components/dashboard/courses/CourseDetails";
+import CourseDetails from "@/components/dashboard/courses/CourseDetails";
 
 const CourseDetailPage = async ({
   params,
@@ -9,7 +9,7 @@ const CourseDetailPage = async ({
 
   return (
     <div>
-      <CourseBuilder courseId={courseId} />
+      <CourseDetails courseId={courseId} />
     </div>
   );
 };
