@@ -105,14 +105,12 @@ const LoginForm = () => {
   const isLoading = loginMutation.isPending;
 
   return (
-    <Card className="w-full sm:max-w-md shadow-xl">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
-          Admin Dashboard
+    <Card className="border-none shadow-none bg-transparent">
+      <CardHeader className="space-y-2 text-center">
+        <CardTitle className="text-2xl font-semibold">
+          Welcome Back 👋
         </CardTitle>
-        <CardDescription className="text-center">
-          Sign in with your authorized account
-        </CardDescription>
+        <CardDescription>Sign in to continue to your dashboard</CardDescription>
       </CardHeader>
       <CardContent>
         <form id="login-form" onSubmit={form.handleSubmit(onSubmit)}>
@@ -124,16 +122,12 @@ const LoginForm = () => {
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="login-email">Email</FieldLabel>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-3.5 h-4 w-4 opacity-70" />
                     <Input
                       {...field}
-                      id="login-email"
                       type="email"
                       placeholder="admin@church.org"
-                      className="pl-10"
-                      aria-invalid={fieldState.invalid}
-                      disabled={isLoading}
-                      autoComplete="email"
+                      className="pl-10 h-11 rounded-xl bg-background/70 border focus:ring-2 focus:ring-primary/40 transition-all"
                     />
                   </div>
                   {fieldState.invalid && (
@@ -157,23 +151,21 @@ const LoginForm = () => {
                       Forgot password?
                     </Link>
                   </div>
+
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Lock className="absolute left-3 top-3.5 h-4 w-4 opacity-70" />
+
                     <Input
                       {...field}
-                      id="login-password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      className="px-10"
-                      aria-invalid={fieldState.invalid}
-                      disabled={isLoading}
-                      autoComplete="current-password"
+                      placeholder="Enter your password"
+                      className="pl-10 pr-10 h-11 rounded-xl bg-background/70 border focus:ring-2 focus:ring-primary/40 transition-all"
                     />
 
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground cursor-pointer"
                       onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3.5 opacity-70 hover:opacity-100"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -195,22 +187,15 @@ const LoginForm = () => {
           <Button
             type="submit"
             form="login-form"
-            className="w-full cursor-pointer"
             disabled={isLoading}
+            className="w-full h-11 rounded-xl shadow-lg transition-all hover:scale-[1.01]"
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Sign In to Dashboard"
-            )}
+            {isLoading ? "Signing in..." : "Sign In"}
           </Button>
         </div>
 
-        <div className="mt-6 p-3 bg-muted/50 rounded-lg text-center">
-          <p className="text-sm text-muted-foreground">Admin access required</p>
+        <div className="mt-6 text-center text-xs text-muted-foreground">
+          Authorized admin access only
         </div>
       </CardContent>
     </Card>

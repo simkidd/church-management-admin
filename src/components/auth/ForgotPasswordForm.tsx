@@ -79,7 +79,9 @@ const ForgotPasswordForm = () => {
       <Card className="w-full sm:max-w-md shadow-xl">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <CheckCircle className="h-12 w-12 text-green-500" />
+            <div className="p-3 rounded-full bg-green-500/10">
+              <CheckCircle className="h-10 w-10 text-green-500" />
+            </div>
           </div>
           <CardTitle className="text-2xl font-bold">Check Your Email</CardTitle>
           <CardDescription>
@@ -106,7 +108,12 @@ const ForgotPasswordForm = () => {
               Try Another Email
             </Button>
 
-            <Button type="button" variant="outline" className="w-full" asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-11 rounded-xl shadow-lg hover:scale-[1.01] transition-all"
+              asChild
+            >
               <Link href="/auth/login">
                 <ArrowLeft className="h-4 w-4 " />
                 Back to Login
@@ -120,7 +127,7 @@ const ForgotPasswordForm = () => {
 
   // Form state
   return (
-    <Card className="w-full sm:max-w-md shadow-xl">
+    <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">
           Reset Password
@@ -145,7 +152,7 @@ const ForgotPasswordForm = () => {
                       id="forgot-email"
                       type="email"
                       placeholder="admin@church.org"
-                      className="pl-10"
+                      className="pl-10 pr-10 h-11 rounded-xl bg-background/70 border focus:ring-2 focus:ring-primary/40 transition-all"
                       aria-invalid={fieldState.invalid}
                       disabled={isLoading}
                       autoComplete="email"
@@ -164,7 +171,7 @@ const ForgotPasswordForm = () => {
           <Button
             type="submit"
             form="forgot-password-form"
-            className="w-full cursor-pointer"
+            className="w-full h-11 rounded-xl shadow-lg hover:scale-[1.01] transition-all"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -177,7 +184,12 @@ const ForgotPasswordForm = () => {
             )}
           </Button>
 
-          <Button type="button" variant="outline" className="w-full" asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-11 rounded-xl shadow-lg hover:scale-[1.01] transition-all"
+            asChild
+          >
             <Link href="/auth/login">
               <ArrowLeft className="h-4 w-4 " />
               Back to Login

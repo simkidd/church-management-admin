@@ -44,7 +44,7 @@ const formSchema = z
       .min(8, "Password must be at least 8 characters")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number",
       ),
     confirmPassword: z.string(),
   })
@@ -121,7 +121,7 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
   // Token invalid state
   if (!token) {
     return (
-      <Card className="w-full sm:max-w-md shadow-xl">
+      <Card className="border-none shadow-none bg-transparent">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold text-destructive">
             Invalid Reset Link
@@ -135,11 +135,18 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
             <p>Please request a new password reset link from the login page.</p>
           </div>
 
-          <Button className="w-full" asChild>
+          <Button
+            className="w-full h-11 rounded-xl shadow-lg hover:scale-[1.01] transition-all"
+            asChild
+          >
             <Link href="/forgot-password">Request New Reset Link</Link>
           </Button>
 
-          <Button variant="outline" className="w-full" asChild>
+          <Button
+            variant="outline"
+            className="w-full h-11 rounded-xl shadow-lg hover:scale-[1.01] transition-all"
+            asChild
+          >
             <Link href="/auth/login">
               <ArrowLeft className="h-4 w-4" />
               Back to Login
@@ -153,7 +160,7 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
   // Success state after reset
   if (resetPasswordMutation.isSuccess) {
     return (
-      <Card className="w-full sm:max-w-md shadow-xl">
+      <Card className="border-none shadow-none bg-transparent">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <CheckCircle className="h-12 w-12 text-green-500" />
@@ -170,7 +177,10 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
             <p>Redirecting you to the login page...</p>
           </div>
 
-          <Button className="w-full" asChild>
+          <Button
+            className="w-full h-11 rounded-xl shadow-lg hover:scale-[1.01] transition-all"
+            asChild
+          >
             <Link href="/auth/login">Go to Login</Link>
           </Button>
         </CardContent>
@@ -180,7 +190,7 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
 
   // Main reset form
   return (
-    <Card className="w-full sm:max-w-md shadow-xl">
+    <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">
           Create New Password
@@ -205,7 +215,7 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
                       id="reset-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter new password"
-                      className="pl-10 pr-10"
+                      className="pl-10 pr-10 h-11 rounded-xl bg-background/70 border focus:ring-2 focus:ring-primary/40 transition-all"
                       aria-invalid={fieldState.invalid}
                       disabled={isLoading}
                       autoComplete="new-password"
@@ -244,14 +254,14 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
                       id="confirm-password"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm new password"
-                      className="pl-10 pr-10"
+                      className="pl-10 pr-10 h-11 rounded-xl bg-background/70 border focus:ring-2 focus:ring-primary/40 transition-all"
                       aria-invalid={fieldState.invalid}
                       disabled={isLoading}
                       autoComplete="new-password"
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground cursor-pointer"
+                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground cursor-pointer"
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
@@ -276,7 +286,7 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
           <Button
             type="submit"
             form="reset-password-form"
-            className="w-full cursor-pointer"
+            className="w-full h-11 rounded-xl shadow-lg hover:scale-[1.01] transition-all"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -289,7 +299,11 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
             )}
           </Button>
 
-          <Button variant="outline" className="w-full" asChild>
+          <Button
+            variant="outline"
+            className="w-full h-11 rounded-xl shadow-lg hover:scale-[1.01] transition-all"
+            asChild
+          >
             <Link href="/auth/login">
               <ArrowLeft className="h-4 w-4" />
               Back to Login
