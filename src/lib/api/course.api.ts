@@ -1,4 +1,8 @@
-import { ICourse, ListCourseParams } from "@/interfaces/course.interface";
+import {
+  ICourse,
+  ILessonMaterial,
+  ListCourseParams,
+} from "@/interfaces/course.interface";
 import {
   ApiResponse,
   PaginatedResponse,
@@ -67,6 +71,47 @@ export const courseApi = {
     }>
   > => {
     const response = await api.get(`/courses/${courseId}/modules`);
+    return response.data;
+  },
+
+  getCourseMaterials: async (
+    courseId: string,
+  ): Promise<ApiResponse<ILessonMaterial[]>> => {
+    const response = await api.get(`/materials/course/${courseId}`);
+    return response.data;
+  },
+
+  getLessonMaterials: async (
+    lessonId: string,
+  ): Promise<ApiResponse<ILessonMaterial[]>> => {
+    const response = await api.get(`/materials/lesson/${lessonId}`);
+    return response.data;
+  },
+  createMaterial: async (
+    payload: FormData,
+  ): Promise<ApiResponse<ILessonMaterial[]>> => {
+    const response = await api.post(`/materials/create`, payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
+  updateMaterial: async (
+    id: string,
+    payload: FormData,
+  ): Promise<ApiResponse<ILessonMaterial[]>> => {
+    const response = await api.put(`/materials/${id}/update`, payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
+  deleteMaterial: async (
+    id: string,
+  ): Promise<ApiResponse<ILessonMaterial[]>> => {
+    const response = await api.delete(`/materials/${id}/delete`);
     return response.data;
   },
 };

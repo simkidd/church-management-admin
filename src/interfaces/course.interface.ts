@@ -1,3 +1,4 @@
+import { ILesson } from "./lesson.interface";
 import { IUser } from "./user.interface";
 
 export interface ICourse {
@@ -44,4 +45,19 @@ export interface ICourseEnrollment {
   status: "active" | "completed" | "cancelled" | null;
   progressPercentage: number;
   certificateIssued: boolean;
+}
+
+export interface IMaterialFile {
+  url: string;
+  publicId?: string;
+}
+
+export interface ILessonMaterial {
+  _id: string;
+  lesson: ILesson;
+  title: string;
+  file: IMaterialFile;
+  isDownloadable: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

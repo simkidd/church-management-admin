@@ -12,6 +12,7 @@ import {
   Plus,
   PlayCircle,
   Trash2,
+  Paperclip,
 } from "lucide-react";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
@@ -42,6 +43,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import MaterialForm from "../learning-materials/MaterialForm";
+import LessonMaterials from "../learning-materials/LessonMaterials";
 
 interface SortableLessonItemProps {
   lesson: ILessonWithState;
@@ -58,6 +61,7 @@ export const SortableLessonItem = ({
 }: SortableLessonItemProps) => {
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showMaterials, setShowMaterials] = useState(false);
 
   const {
     attributes,
@@ -160,7 +164,10 @@ export const SortableLessonItem = ({
                   </h4>
 
                   {lesson.isPreview && (
-                    <Badge variant="secondary" className="text-[10px] sm:text-xs">
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] sm:text-xs"
+                    >
                       Preview
                     </Badge>
                   )}
@@ -229,6 +236,28 @@ export const SortableLessonItem = ({
 
               <Tooltip>
                 <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => setShowMaterials((prev) => !prev)}
+                  >
+                    <Paperclip className="h-4 w-4" />
+                    {lesson.materialCount > 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        {lesson.materialCount}
+                      </span>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manage materials</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <div>
                     <LessonForm
                       moduleId={moduleId}
@@ -272,6 +301,12 @@ export const SortableLessonItem = ({
           </div>
         </div>
       </div>
+
+      {showMaterials && (
+        <div className="mt-2">
+          <LessonMaterials lessonId={lesson._id} open={showMaterials} />
+        </div>
+      )}
 
       {lesson.quiz && (
         <div className="mt-2">

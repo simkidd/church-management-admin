@@ -42,7 +42,7 @@ import {
   ListTodo,
   Loader2,
   MoreVertical,
-  Trash2
+  Trash2,
 } from "lucide-react";
 
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -57,7 +57,6 @@ import { CourseBuilderTab } from "./course-builder/CourseBuilderTab";
 import { CourseDetailsOverviewTab } from "./CourseDetailsOverviewTab";
 import { CourseDetailsSkeleton } from "./CourseDetailsSkeleton";
 import CourseForm from "./CourseForm";
-import CourseLearningMaterialsTab from "./learning-materials/CourseLearningMaterialsTab";
 
 const CourseBuilderPage = ({ courseId }: { courseId: string }) => {
   const router = useRouter();
@@ -89,7 +88,10 @@ const CourseBuilderPage = ({ courseId }: { courseId: string }) => {
   });
 
   const course = courseData?.data;
-  const modules = modulesData?.data?.modules ?? [];
+  const modules = useMemo(
+    () => modulesData?.data?.modules ?? [],
+    [modulesData?.data],
+  );
   const courseQuiz = modulesData?.data?.quiz ?? null;
 
   // Calculate stats
@@ -331,14 +333,6 @@ const CourseBuilderPage = ({ courseId }: { courseId: string }) => {
             <ListTodo className="h-4 w-4 mr-2" />
             Content Builder
           </TabsTrigger>
-
-          <TabsTrigger
-            value="materials"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border"
-          >
-            <Files className="h-4 w-4 mr-2" />
-            Learning Materials
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-2">
@@ -352,14 +346,6 @@ const CourseBuilderPage = ({ courseId }: { courseId: string }) => {
             loading={isModulesLoading}
             progressionMode={course.progressionMode}
             courseQuiz={courseQuiz}
-          />
-        </TabsContent>
-
-        <TabsContent value="materials" className="mt-2">
-          <CourseLearningMaterialsTab
-            course={course}
-            modules={modules}
-            loading={isModulesLoading}
           />
         </TabsContent>
       </Tabs>

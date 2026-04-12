@@ -1,8 +1,6 @@
 import {
   ICertificate,
-  ICertificateTemplate,
-  CreateCertificateTemplateDTO,
-  UpdateCertificateTemplateDTO,
+  ICertificateTemplate
 } from "@/interfaces/certificate.interface";
 import { ApiResponse } from "@/interfaces/response.interface";
 import api from "../axios";
