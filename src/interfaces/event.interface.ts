@@ -6,14 +6,11 @@ export interface IEvent {
   description: string;
   startDate: string;
   endDate: string;
-  time: string;
   location: string;
   requiresRegistration: boolean;
   maxAttendees?: number;
   registeredUsers: IUser[];
-  image?: IMedia | null;
   isPublished: boolean;
-  isFeatured: boolean;
   createdBy: IUser;
   isMultiDay: boolean;
   createdAt: string;

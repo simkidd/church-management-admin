@@ -1,18 +1,18 @@
 // lib/api/event.api.ts
+import { EventFormValues } from "@/components/dashboard/events/EventForm";
+import { IEvent, ListEventsParams } from "@/interfaces/event.interface";
 import {
   ApiResponse,
   PaginatedResponse,
 } from "@/interfaces/response.interface";
 import api from "../axios";
-import { IEvent, ListEventsParams } from "@/interfaces/event.interface";
-import { AxiosProgressEvent } from "axios";
 
 export const eventsApi = {
   // Get all events with filters
   getAllEvents: async (
-    params?: ListEventsParams
+    params?: ListEventsParams,
   ): Promise<ApiResponse<PaginatedResponse<IEvent>>> => {
-    const response = await api.get("/events", { params });
+    const response = await api.get("/events/admin", { params });
     return response.data;
   },
 
@@ -24,32 +24,25 @@ export const eventsApi = {
 
   // Create event
   createEvent: async (
-    data: FormData,
-    onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined
+    data: EventFormValues,
   ): Promise<ApiResponse<{ event: IEvent }>> => {
-    const response = await api.post("/events/create", data, {
-      headers: { "Content-Type": "multipart/form-data" },
-      onUploadProgress,
-    });
+    const response = await api.post("/events/create", data);
     return response.data;
   },
 
   // Update event
   updateEvent: async (
     id: string,
-    data: FormData,
-    onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined
+    data: EventFormValues,
   ): Promise<ApiResponse<{ event: IEvent }>> => {
-    const response = await api.put(`/events/${id}/update`, data, {
-      headers: { "Content-Type": "multipart/form-data" },
-      onUploadProgress,
-    });
+    const response = await api.put(`/events/${id}/update`, data);
     return response.data;
   },
 
   // Delete event
-  deleteEvent: async (id: string): Promise<void> => {
-    await api.delete(`/events/${id}/delete`);
+  deleteEvent: async (id: string): Promise<{ message: string }> => {
+    const res = await api.delete(`/events/${id}/delete`);
+    return res.data;
   },
 
   // Register for event
