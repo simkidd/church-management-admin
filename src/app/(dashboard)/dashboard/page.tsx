@@ -1,65 +1,120 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Users, BookOpen, FileText, Calendar, TrendingUp } from "lucide-react";
+import { useDashboardOverview } from "@/hooks/useDashboardOverview";
+import { Award, BookOpen, Calendar, Eye, FileText, Users } from "lucide-react";
+
 import { QuickActions } from "@/components/dashboard/overview/QuickActions";
 import { RecentActivity } from "@/components/dashboard/overview/RecentActivity";
+import { TopCourses } from "@/components/dashboard/overview/TopCourses";
+import { SkeletonDashboard } from "@/components/dashboard/overview/SkeletonDashboard";
 
 export default function DashboardPage() {
+  const { data, isPending, error } = useDashboardOverview();
+
+  if (isPending) {
+    return <SkeletonDashboard />;
+  }
+
+  if (error || !data) {
+    return <div className="p-6 text-red-500">Failed to load dashboard</div>;
+  }
+
+  const overview = data.data;
+
   const stats = [
-    { title: "Total Members", value: "1,247", change: "+12", icon: Users },
-    { title: "Active Courses", value: "24", change: "+3", icon: BookOpen },
-    { title: "This Month's Sermons", value: "8", change: "+2", icon: FileText },
-    { title: "Upcoming Events", value: "15", change: "+5", icon: Calendar },
+    {
+      title: "Members",
+      value: overview.kpis.totalUsers,
+      icon: Users,
+    },
+    {
+      title: "Courses",
+      value: overview.kpis.totalCourses,
+      icon: BookOpen,
+    },
+    {
+      title: "Enrollments",
+      value: overview.kpis.activeEnrollments,
+      icon: Calendar,
+    },
+    {
+      title: "Sermons",
+      value: overview.kpis.totalSermons,
+      icon: FileText,
+    },
+    {
+      title: "Total Views",
+      value: overview.kpis.totalViews,
+      icon: Eye,
+    },
+    {
+      title: "Certificates",
+      value: overview.kpis.totalCertificates,
+      icon: Award,
+    },
   ];
 
   return (
     <div className="space-y-6">
+      {/* HEADER */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Dashboard Overview
-        </h1>
-        <p className="text-muted-foreground">
-          Welcome back! Here&apos;s what&apos;s happening today.
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">
+          Overview of church learning activity
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* KPI GRID */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat, index) => (
           <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
                 {stat.title}
               </CardTitle>
               <stat.icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
+
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">
-                <span className="text-green-600">{stat.change}</span> from last
-                month
-              </p>
+              <div className="text-xl font-bold">{stat.value}</div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        {/* Recent Activity */}
-        <Card className="col-span-4">
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* TOP COURSES */}
+        <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>Top Courses</CardTitle>
           </CardHeader>
+
           <CardContent>
-            <RecentActivity />
+            <TopCourses data={overview.topCourses} />
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <Card className="col-span-3">
+        {/* RECENT ACTIVITY */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Enrollments</CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <RecentActivity data={overview.recentActivities} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* LOWER SECTION */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* QUICK ACTIONS */}
+        <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
+
           <CardContent>
             <QuickActions />
           </CardContent>
